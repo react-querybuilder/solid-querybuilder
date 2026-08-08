@@ -34,9 +34,10 @@ export default defineConfig({
     globals: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     setupFiles: ['./vitest-setup.ts'],
-    server: {
-      // Fallback if Vitest 4's environment resolution still externalizes solid-js.
-      deps: { inline: [/solid-js/] },
-    },
+    // NOTE: no `server.deps.inline: [/solid-js/]`. The plan designates that a *fallback* for
+    // the case where Vitest externalizes `solid-js`; `resolve.conditions` above is sufficient,
+    // and inlining speculatively risks a second Solid instance in the test env. If a component
+    // ever renders an empty container, or `createContext`/`createStore` identities diverge,
+    // that is the symptom to re-add it for.
   },
 });

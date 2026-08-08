@@ -113,6 +113,13 @@ type-only module erased by the bundler), and allows `./foo.jsx` under `dist/sour
 - `ReactNode` → `LabelNode` (`JSX.Element | string`); titles stay `string`.
 - `ComponentType<P>` → Solid's `Component<P>`.
 - Use `import type` for type-only imports (`verbatimModuleSyntax` is on).
+- `ReactMouseEvent` → the DOM `MouseEvent`.
+- `QueryBuilderProps` stays the **conditional type React writes**. Solid components are plain
+  functions with no compile-time prop enumeration, so there is no `QueryBuilderPropsBase`, no
+  `RuleTypeOf<RG>` helper, and no re-widening cast inside components (all of which Vue needed).
+- `src/types/types.test-d.ts` is compiled by `tsc` (`bun run check`), **not** run by Vitest. It is
+  a **two-sided** gate: a failed assertion errors, and an `@ts-expect-error` that stops erroring
+  (member quietly re-added) errors as `TS2578`. Both directions proven at step 2.
 - **TypeScript is pinned to `^5.9`.** Neither `vite-plugin-solid`'s babel preset nor the
   declaration pipeline is validated against TypeScript 7.
 
