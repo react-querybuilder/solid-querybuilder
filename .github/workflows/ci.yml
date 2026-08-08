@@ -49,7 +49,7 @@ jobs:
         run: bun run test:ssr
 
   solid-next:
-    name: build & test (solid-js@2.0.0-beta, non-gating)
+    name: build & test (solid-js@2.0.0-beta.32, non-gating)
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -63,7 +63,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Bump solid-js to next
-        run: bun add -D solid-js@2.0.0-beta
+        run: bun add -D solid-js@2.0.0-beta.32
 
       - name: Build
         run: bun run build
