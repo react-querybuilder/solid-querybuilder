@@ -48,6 +48,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `README.md` gains a prominent "Requires Solid 2.0" note, documentation links, and an examples
   section; new `docs/differences-from-react-querybuilder.md`, `docs/styling.md`, and
   `docs/customization.md`.
+- Accessibility suite (`src/components/a11y.test.tsx`): `vitest-axe` over all eight conformance
+  scenarios plus an all-controls independent-combinator case (nine cases), each asserted twice —
+  WCAG 2.0/2.1 A+AA must be empty, and best-practice must equal exactly `['label-title-only']`, so
+  any _other_ best-practice regression still fails. Plus keyboard tests: tab order through a rule
+  row, Enter/Space activation, and the not-toggle label association. It imports
+  `test/conformance/{scenarios,queries}` rather than duplicating them, so a11y is asserted against
+  exactly the prop combinations DOM parity is, and it still runs in a fresh clone (both modules are
+  fixture-independent).
+
+### Known limitations
+
+- **`label-title-only` (axe best-practice) fires on every selector and text editor.** React Query
+  Builder labels these controls with `title` alone, and full DOM parity is a locked decision for
+  this port, so adding `aria-label` would break the conformance harness. It is not a WCAG failure:
+  `title` produces an accessible name, and the level-A `label`/`aria-*` rules pass across all nine
+  a11y cases. Consumers who need a visible label can supply one through `controlElements`.
 
 ### Fixed
 

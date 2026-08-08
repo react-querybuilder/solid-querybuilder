@@ -277,13 +277,21 @@ opposite render modes. This is structural, not cosmetic — one plugin instance 
 **Standing rule: every gate must be proven to fail.** When a step adds a gate, deliberately break
 it, record that it went red, then revert. A gate that cannot fail is worse than none.
 
-Current gates (steps 6 + 8): `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
+Current gates (steps 6 + 7 + 8): `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
 `lint`, `test:coverage` (global 80% lines, plus a per-directory 90% lines on `packages/*/src/**` —
 widened at step 5 from the step-3 `packages/*/src/reactive/**`, which it subsumes; both
 non-vacuous, both proved red with no injected dead code), **`conformance`** (237 assertions: 50
 static classnames, 50 accessible descriptions, 50 post-flush classnames, 58 action sequences, 19
 port-side action sequences, plus alignment/drift/format), `test:ssr` (**both halves**), and
 `check` including the examples.
+
+The step-7 a11y gate was proved red and reverted: deleting the `title` binding from
+`ValueSelector.tsx` turned **all nine** axe cases red on the **WCAG** assertion (`select-name`, a
+level-A violation, not merely a best-practice one) while all three keyboard tests stayed green.
+Note the best-practice assertion is an **equality** check against `['label-title-only']`, not a
+suppression — RQB labels selectors and text editors with `title` alone and DOM parity is locked, so
+that one rule is accepted (recorded under "Known limitations" in `CHANGELOG.md`) while any _other_
+best-practice regression still fails.
 
 The four step-6 conformance gates were each proved red and reverted:
 

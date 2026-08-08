@@ -129,6 +129,17 @@ FullCombinator>`), and `QueryBuilderProps` is the same conditional type React Qu
 Solid components are plain functions with no compile-time prop enumeration, so there is no
 non-conditional base interface.
 
+`QueryBuilder` is generic over `RG`, `F`, `O`, and `C`; `Rule` and `RuleGroup` over `F` and `O`
+(`RuleProps`/`RuleGroupProps` carry no `RG` parameter upstream either — the group type is fixed by
+`RuleGroupTypeAny` on `RuleGroupProps.ruleGroup`). `SimpleQueryBuilderProps`,
+`SimpleQueryBuilderPropsIC`, `SimpleRuleProps`, and `SimpleRuleGroupProps` are the
+default-parameter aliases.
+
+Two problems the Vue port had do **not** arise here, because a Solid component is a plain generic
+function rather than a compiled single-file component: there is no compiler macro or `generic=`
+attribute to declare the parameters, and the emitted props carry no `Record<string, unknown>` index
+signature — so no component needs a `widenedProps` re-widening cast.
+
 ## 7. Reactivity
 
 React Query Builder's hooks (`useQueryBuilder`, `useRule`, `useRuleGroup`, `useValueEditor`, …) are
