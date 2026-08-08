@@ -6,10 +6,23 @@
  * call. The library is imported by BARE SPECIFIER on purpose: that exercises the `solid` export
  * condition the same way a real SSR consumer does.
  *
+ * `QueryBuilder` (not a placeholder) since step 4: it uses `createContext`, `createStore`, and
+ * `createEffect`, so it is also the thing that would break first if the two module graphs ever
+ * stopped sharing one Solid instance.
+ *
  * Plain `.jsx`, not `.tsx`, so it stays out of the typecheck project — `bun run check` must not
  * depend on `dist/` existing.
  */
 import { renderToString } from '@solidjs/web';
-import { Placeholder } from 'solid-querybuilder';
+import { QueryBuilder } from 'solid-querybuilder';
 
-export const render = () => renderToString(() => <Placeholder label="ssr-smoke" />);
+const fields = [{ name: 'f1', label: 'F1' }];
+
+const query = {
+  id: 'root',
+  combinator: 'and',
+  rules: [{ id: 'r1', field: 'f1', operator: '=', value: 'v1' }],
+};
+
+export const render = () =>
+  renderToString(() => <QueryBuilder fields={fields} query={query} onQueryChange={() => {}} />);

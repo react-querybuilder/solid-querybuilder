@@ -13,7 +13,9 @@
  *    `renderToString` from `@solidjs/web` (synchronous in Solid 2), and assert the full
  *    markup.
  *
- * At step 1 the component under test is `Placeholder`; step 4 repoints this at `QueryBuilder`.
+ * The component under test is `QueryBuilder` (step 4 repointed this from the step-1
+ * `Placeholder`) — it exercises `createContext`, `createStore`, and `createEffect`, which is
+ * what makes the single-Solid-instance requirement below load-bearing rather than theoretical.
  * Step 8 adds a SolidStart SSR gate but keeps this script, because it is the only thing that
  * checks the export condition in isolation.
  */
@@ -153,11 +155,44 @@ const html: string = mod.render();
 
 await vite.close();
 
-const expectedHtml = '<div data-testid="solid-querybuilder-placeholder">ssr-smoke</div>';
+// The markup assertion. Not a full-string comparison: the rendered tree is ~2KB and dominated
+// by the default operator list, which would make this a snapshot in all but name. Instead it
+// asserts every structural claim the SSR path is here to make — that the wrapper, the group, the
+// rule, and each of the rule's controls all rendered, with the *value* of the controlled query
+// present — plus the exact number of `data-testid` elements, so a dropped or added control turns
+// this red.
+const requiredFragments = [
+  '<div role="form" class="queryBuilder" data-dnd="disabled" data-inlinecombinators="disabled">',
+  'data-testid="rule-group"',
+  'class="ruleGroup-header"',
+  'data-testid="combinators"',
+  'data-testid="add-rule"',
+  'data-testid="add-group"',
+  'class="ruleGroup-body"',
+  'data-testid="rule"',
+  'data-path="[0]"',
+  'data-testid="fields"',
+  'data-testid="operators"',
+  'data-testid="value-editor"',
+  'value="v1"',
+  'data-testid="remove-rule"',
+];
 
-if (html !== expectedHtml) {
-  fail(`SSR markup mismatch.\n  expected: ${expectedHtml}\n  actual:   ${html}`);
+const expectedTestIdCount = 9;
+
+for (const fragment of requiredFragments) {
+  if (!html.includes(fragment)) {
+    fail(`SSR markup is missing ${fragment}.\n  actual: ${html}`);
+  }
 }
 
-console.log(`SSR render: ${html} (ok)`);
+const testIdCount = html.match(/data-testid=/g)?.length ?? 0;
+if (testIdCount !== expectedTestIdCount) {
+  fail(
+    `SSR markup has ${testIdCount} \`data-testid\` elements, expected ${expectedTestIdCount}.` +
+      `\n  actual: ${html}`
+  );
+}
+
+console.log(`SSR render: ${testIdCount} controls, all structural fragments present (ok)`);
 console.log('test:ssr passed.');
