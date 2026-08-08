@@ -98,7 +98,7 @@ describe('RuleGroup', () => {
     expect(headerTestIDs(groupAtPath(container, '[1]'))).not.toContain('add-group');
   });
 
-  it('renders the not-toggle, shift-actions, and undo/redo slots, null until step 5', () => {
+  it('renders the not-toggle, shift-actions, and undo/redo controls', () => {
     const { container } = render(() => (
       <QueryBuilder
         fields={fields}
@@ -108,22 +108,42 @@ describe('RuleGroup', () => {
         showUndoRedo
       />
     ));
-    const ids = headerTestIDs(groupAtPath(container, '[1]'));
-    expect(ids).not.toContain('not-toggle');
-    expect(ids).not.toContain('shift-actions');
-    expect(headerTestIDs(groupAtPath(container, '[]'))).not.toContain('undo-redo-actions');
-    // The controls that *are* implemented still render, in order.
-    expect(ids).toEqual(['combinators', 'add-rule', 'add-group', 'remove-group']);
+    expect(headerTestIDs(groupAtPath(container, '[1]'))).toEqual([
+      'shift-actions',
+      'combinators',
+      'not-toggle',
+      'add-rule',
+      'add-group',
+      'remove-group',
+    ]);
+    // Shift actions and the remove button are omitted at the root; undo/redo is root-only.
+    expect(headerTestIDs(groupAtPath(container, '[]'))).toEqual([
+      'combinators',
+      'not-toggle',
+      'add-rule',
+      'add-group',
+      'undo-redo-actions',
+      'undo-action',
+      'redo-action',
+    ]);
   });
 
-  it('renders the inline-combinator slot between rules, null until step 5', () => {
+  it('renders the inline combinator between rules', () => {
     const { container } = render(() => (
       <QueryBuilder fields={fields} defaultQuery={nested} showCombinatorsBetweenRules />
     ));
     // The group's own combinator selector moves out of the header when combinators sit between
-    // rules; the between-rules control itself lands at step 5.
+    // rules, and an inline combinator appears before every child but the first.
     expect(headerTestIDs(groupAtPath(container, '[]'))).toEqual(['add-rule', 'add-group']);
-    expect(container.querySelector('[data-testid="inline-combinator"]')).toBeNull();
+    const body = groupAtPath(container, '[]').querySelector('.ruleGroup-body')!;
+    expect([...body.children].map(c => c.getAttribute('data-testid'))).toEqual([
+      'rule',
+      'inline-combinator',
+      'rule-group',
+    ]);
+    expect(
+      body.querySelector('[data-testid="inline-combinator"] > [data-testid="combinators"]')
+    ).not.toBeNull();
   });
 
   it('renders children in query order, through schema.controls', () => {

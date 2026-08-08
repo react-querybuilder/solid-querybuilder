@@ -173,6 +173,12 @@ it passes whether or not the `snapshot()` is there:
 - Element order and conditional rendering are specified by React's `Rule.tsx` / `RuleGroup.tsx`.
   Read them as a spec, not as code to translate.
 - `Label` is a plain function component, not a fragment-returning helper with stray whitespace.
+- **`defaultControlElements` is an object of getters, deliberately.** `Rule` → `RuleSubQuery` →
+  `defaultControlElements` → `Rule` is a real import cycle (a subquery builds its own state, which
+  needs the default controls). Eager entries throw a TDZ `ReferenceError` whenever `Rule.tsx` is
+  the module the cycle is entered through. Do not "simplify" them back to plain properties.
+- A subquery renders **bare `<div>`s** for its group header/body, not a `rule-group` element
+  (React's `RuleWithSubQueryGroupComponentsWrapper`), and it is not customizable.
 
 ### Types
 
@@ -197,11 +203,11 @@ it passes whether or not the `snapshot()` is there:
 **Standing rule: every gate must be proven to fail.** When a step adds a gate, deliberately break
 it, record that it went red, then revert. A gate that cannot fail is worse than none.
 
-Current gates (step 3): `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
-`lint`, `test:coverage` (global 80% lines, plus a per-directory 90% lines on
-`packages/*/src/reactive/**` — both now non-vacuous, and both proved red at step 3 with no
-injected dead code), `test:ssr`. (`conformance` is a stub that exits 0 until step 6; it is not a
-gate yet.)
+Current gates (step 5): `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
+`lint`, `test:coverage` (global 80% lines, plus a per-directory 90% lines on `packages/*/src/**` —
+widened at step 5 from the step-3 `packages/*/src/reactive/**`, which it subsumes; both
+non-vacuous, both proved red with no injected dead code), `test:ssr`. (`conformance` is a stub
+that exits 0 until step 6; it is not a gate yet.)
 
 All five were proven red at step 1 and reverted: coverage (threshold to 99 + an injected
 uncovered function), export-condition **order** (`import` moved first), export-condition

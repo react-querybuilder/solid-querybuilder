@@ -55,13 +55,18 @@ describe('Rule', () => {
     expect(ruleTestIDs(container)).toEqual(['fields', 'operators', 'value-editor', 'remove-rule']);
   });
 
-  it('renders the shift-actions slot, which is a null component until step 5', () => {
+  it('renders the shift actions before the field selector', () => {
     const { container } = render(() => (
       <QueryBuilder fields={fields} defaultQuery={singleRule} showShiftActions />
     ));
-    // The block runs — its titles/labels are computed — but the control renders nothing yet.
-    expect(ruleTestIDs(container)).not.toContain('shift-actions');
-    expect(ruleTestIDs(container)[0]).toBe('fields');
+    expect(ruleTestIDs(container)[0]).toBe('shift-actions');
+    expect(ruleTestIDs(container)).toEqual([
+      'shift-actions',
+      'fields',
+      'operators',
+      'value-editor',
+      'remove-rule',
+    ]);
   });
 
   it('renders the match-mode slot instead of the operator for a subquery field', () => {
@@ -82,9 +87,13 @@ describe('Rule', () => {
         }}
       />
     ));
-    // `matchModeEditor` is a null component until step 5; what this pins now is that the
-    // operator/value branch is *not* taken for a match-mode field.
-    expect(ruleTestIDs(container)).toEqual(['fields', 'remove-rule']);
+    // The operator/value branch is not taken for a match-mode field; the match mode editor takes
+    // its place, and the subquery's own group renders around the rule's action buttons.
+    const ids = ruleTestIDs(container);
+    // The subquery's group header/body are bare `<div>`s, not a `rule-group` element.
+    expect(ids.slice(0, 3)).toEqual(['fields', 'match-mode-editor', 'combinators']);
+    expect(ids).not.toContain('rule-group');
+    expect(ids).not.toContain('operators');
     expect(container.querySelector('[data-testid="rule"]')).toHaveClass('rule-hasSubQuery');
   });
 

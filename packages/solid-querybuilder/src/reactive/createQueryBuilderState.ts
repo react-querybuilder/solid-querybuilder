@@ -190,8 +190,12 @@ export const createQueryBuilderState = <
   );
 
   // #region Manager
+  // ⚠️ `untrack` wraps the *property* reads, not just the call that returns the props object.
+  // Solid props are getters, so reading one outside a tracking scope is what raises
+  // `[STRICT_READ_UNTRACKED]` — one warning per setup read, on every mount. These reads are
+  // deliberately one-time (this is initialization), so declaring that is the fix.
   const initialProps = untrack(getProps);
-  const initialManager = snapshot(initialProps.manager) as
+  const initialManager = untrack(() => snapshot(initialProps.manager)) as
     | QueryManager<RuleGroupTypeAny, F, FullOperator, FullCombinator>
     | undefined;
 
@@ -308,15 +312,17 @@ export const createQueryBuilderState = <
     );
 
   if (!initialManager) {
-    const candidate = resolveCandidateQuery(
-      {
-        // `snapshot` throughout: the manager deep-freezes what it is given, which throws on a
-        // store proxy. A parent holding the query in its own `createStore` is the common case.
-        query: snapshot(initialProps.query),
-        defaultQuery: snapshot(initialProps.defaultQuery),
-        fallbackQuery: manager.getQuery(),
-      },
-      { idGenerator: initialProps.idGenerator }
+    const candidate = untrack(() =>
+      resolveCandidateQuery(
+        {
+          // `snapshot` throughout: the manager deep-freezes what it is given, which throws on a
+          // store proxy. A parent holding the query in its own `createStore` is the common case.
+          query: snapshot(initialProps.query),
+          defaultQuery: snapshot(initialProps.defaultQuery),
+          fallbackQuery: manager.getQuery(),
+        },
+        { idGenerator: initialProps.idGenerator }
+      )
     );
     if (!Object.is(candidate, manager.getQuery())) {
       manager.setQuery(snapshot(candidate));

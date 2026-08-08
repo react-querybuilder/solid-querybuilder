@@ -12,10 +12,13 @@ export default defineConfig({
       exclude: ['**/*.{test,spec,test-d}.*'],
       thresholds: {
         lines: 80,
-        // The reactive layer is load-bearing for every component, so it is held to a higher bar
-        // than the repo as a whole. A glob key is scoped to the files it matches and fails
-        // independently of the global threshold above.
-        'packages/*/src/reactive/**': {
+        // The library source is held to a higher bar than the repo as a whole. A glob key is
+        // scoped to the files it matches and fails independently of the global threshold above.
+        //
+        // This replaces the narrower `packages/*/src/reactive/**` key from step 3: the reactive
+        // layer is no longer the only load-bearing directory now that the component tier is
+        // complete, and the wider glob subsumes it.
+        'packages/*/src/**': {
           lines: 90,
         },
       },
