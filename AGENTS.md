@@ -132,6 +132,13 @@ setX(v)` returns the setter's return value and throws "invalid cleanup value". U
   updates need `flush()`.
 - Return getter objects (not objects of accessors, not memoized fresh objects) from composables
   whose result is read once by a Solid context or passed as a prop.
+- **There is no `onMount`.** Solid 2 does not export one. The post-commit-mount equivalent is
+  `createEffect(() => undefined, () => { … })`: a constant compute phase runs the apply phase once,
+  after render, and never under SSR — which is what React's mount `useEffect` does.
+- **`useContext` needs an owner, default or not.** An explicit context default makes a read outside
+  a _provider_ safe, but Solid 2 still throws `Context can only be accessed under a reactive root`
+  with no owner on the stack. A hook that must be safe outside a component needs a `getOwner()`
+  guard in addition to the default (`useQueryBuilderConfig` has one).
 
 ### Store mirror
 
@@ -143,7 +150,22 @@ setX(v)` returns the setter's return value and throws "invalid cleanup value". U
 - `createProjection(fn, seed, options?)` is a derived, **read-only** store with the same `'id'`
   default key. It can be driven from a non-reactive external source (the manager's subscribe
   callback) by bumping a version signal from that callback and reading the signal in `fn` — proven
-  at step 1.5.
+  at step 1.5, and it is what `createQueryBuilderState` uses (step 3).
+- `createStore`'s setter takes a **draft callback** (`setStore(draft => { draft.x = … })`). There is
+  no 1.x `setStore('key', value)` path-argument form; it throws `fn is not a function`.
+
+### The manager's deep freeze is path-dependent
+
+`snapshot()` before every manager write — but a test that asserts this needs two details right, or
+it passes whether or not the `snapshot()` is there:
+
+- `createStore` **declines to proxy an already-frozen object**, so a fixture that has been through a
+  manager earlier in the same file is stored raw and there is no proxy to reject. Use a fresh
+  object.
+- Immer only sees the proxy when the manager does **not** re-prepare the input. A query whose rules
+  have **no `id`** is re-prepared into plain objects and never throws; the same query **with `id`s**
+  throws `'ownKeys' on proxy: trap result did not include 'v'`. Always give store fixtures explicit
+  `id`s.
 
 ### DOM parity
 
@@ -175,9 +197,10 @@ setX(v)` returns the setter's return value and throws "invalid cleanup value". U
 **Standing rule: every gate must be proven to fail.** When a step adds a gate, deliberately break
 it, record that it went red, then revert. A gate that cannot fail is worse than none.
 
-Current gates (step 1.5): `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
-`lint`, `test:coverage` (global 80% lines — vacuous until step 3 adds real executable code in
-`src/reactive/`), `test:ssr`. (`conformance` is a stub that exits 0 until step 6; it is not a
+Current gates (step 3): `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
+`lint`, `test:coverage` (global 80% lines, plus a per-directory 90% lines on
+`packages/*/src/reactive/**` — both now non-vacuous, and both proved red at step 3 with no
+injected dead code), `test:ssr`. (`conformance` is a stub that exits 0 until step 6; it is not a
 gate yet.)
 
 All five were proven red at step 1 and reverted: coverage (threshold to 99 + an injected
