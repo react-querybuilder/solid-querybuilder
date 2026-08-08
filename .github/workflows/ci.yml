@@ -12,7 +12,10 @@ concurrency:
 
 jobs:
   main:
-    name: build & test (solid-js@1.9)
+    # Single job. There is no `solid-js@1.9` leg, gating or otherwise: a v1-target port lives in a
+    # separate repo (`@react-querybuilder/solid1`), and a non-gating leg nobody acts on is exactly
+    # the kind of inert check this project's standing rule exists to prevent.
+    name: build & test (solid-js@2.0.0-beta.32)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -23,6 +26,13 @@ jobs:
 
       - name: Install
         run: bun install --frozen-lockfile
+
+      # First, and deliberately loud. The whole toolchain is on prereleases; an install that
+      # silently drifts onto a newer beta -- or onto `@solidjs/web`'s `latest` tag, which is the
+      # incompatible `2.0.0-experimental.0` line -- should report itself as a version drift rather
+      # than as 200 broken assertions further down.
+      - name: Assert resolved toolchain versions
+        run: bun run check:versions
 
       - name: Format check
         run: bun run fmt:check
@@ -47,36 +57,3 @@ jobs:
 
       - name: SSR smoke test
         run: bun run test:ssr
-
-  # SKIPPING FOR NOW
-  # solid-next:
-  #   name: build & test (solid-js@2.0.0-beta.32, non-gating)
-  #   runs-on: ubuntu-latest
-  #   continue-on-error: true
-  #   steps:
-  #     - uses: actions/checkout@v5
-
-  #     - uses: oven-sh/setup-bun@v2
-  #       with:
-  #         bun-version: latest
-
-  #     - name: Install
-  #       run: bun install --frozen-lockfile
-
-  #     - name: Bump solid-js to next
-  #       run: bun add -D solid-js@2.0.0-beta.32
-
-  #     - name: Build
-  #       run: bun run build
-
-  #     - name: Check
-  #       run: bun run check
-
-  #     - name: Test
-  #       run: bun run test
-
-  #     - name: Conformance
-  #       run: bun run conformance
-
-  #     - name: SSR smoke test
-  #       run: bun run test:ssr

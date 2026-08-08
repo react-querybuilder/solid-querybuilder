@@ -4,7 +4,7 @@ import type {
   BaseTranslationWithLabel,
   BaseTranslationWithPlaceholders,
 } from '@react-querybuilder/core';
-import type { JSX } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 
 /**
  * Anything that can be rendered as a label.

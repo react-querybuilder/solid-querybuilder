@@ -57,21 +57,24 @@
     "build:css": "mkdir -p dist/styles && cp ../../node_modules/@react-querybuilder/core/dist/*.scss dist && cp ../../node_modules/@react-querybuilder/core/dist/styles/*.scss dist/styles && cp -f src/styles/*.scss dist/styles 2>/dev/null || true; bun sass --style=compressed dist",
     "check": "tsc --noEmit -p tsconfig.json",
     "check:exports": "bun run ./scripts/check-dist-specifiers.ts && attw --pack . --profile esm-only",
+    "check:versions": "bun run ./scripts/check-versions.ts",
     "test:ssr": "bun run ./scripts/ssr-smoke.ts",
     "conformance": "echo 'conformance harness lands at step 6' && exit 0"
   },
   "peerDependencies": {
-    "solid-js": "^1.9 || ^2.0.0-0"
+    "solid-js": "^2.0.0-beta.32",
+    "@solidjs/web": "^2.0.0-beta.32"
   },
   "dependencies": {
     "@react-querybuilder/core": "^8.22.4"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "solid-js": "^1.9.14",
+    "@solidjs/web": "2.0.0-beta.32",
+    "solid-js": "2.0.0-beta.32",
     "typescript": "^5.9.3",
     "vite": "^8.2.0",
-    "vite-plugin-solid": "^2.11.14"
+    "vite-plugin-solid": "3.0.0-next.23"
   },
   "publishConfig": {
     "access": "public"

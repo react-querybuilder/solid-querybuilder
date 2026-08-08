@@ -10,7 +10,8 @@
  *    silently dead, and a key-lookup check cannot see that.
  * 2. Compile-and-run a trivial consumer through Vite's SSR pipeline with
  *    `vite-plugin-solid({ solid: { generate: 'ssr', hydratable: false } })`, rendering with
- *    `renderToStringAsync` from `solid-js/web`, and assert the full markup.
+ *    `renderToString` from `@solidjs/web` (synchronous in Solid 2), and assert the full
+ *    markup.
  *
  * At step 1 the component under test is `Placeholder`; step 4 repoints this at `QueryBuilder`.
  * Step 8 adds a SolidStart SSR gate but keeps this script, because it is the only thing that
@@ -124,26 +125,31 @@ const vite = await createServer({
   configFile: false,
   logLevel: 'error',
   plugins: [solid({ solid: { generate: 'ssr', hydratable: false } })],
-  // `solid` so the library resolves to its raw-JSX entry, `node` so `solid-js/web` resolves to
-  // its SERVER build. Listing `solid` alone clobbers Vite's defaults and silently hands back
-  // `solid-js/web`'s browser build, whose `renderToStringAsync` is a stub that throws. Never
-  // add `browser` here.
+  // NO hand-written `ssr.resolve.conditions`. `vite-plugin-solid@3` gives the ssr environment
+  // `['solid', 'development', 'module', 'node', 'development|production']` on its own — measured,
+  // not assumed — which resolves the library to its raw-JSX entry (`solid`) and `@solidjs/web` to
+  // `dist/server.js` (`node`). The Solid 1 value `['solid', 'node', 'development']` was
+  // compensating for the 2.x plugin and now only *removes* `module` and
+  // `development|production` from that list.
+  //
+  // The failure this guards against is unchanged: `@solidjs/web`'s exports map lists `browser`
+  // BEFORE `node`, so any condition set carrying `browser` hands back the browser build, whose
+  // server renderer is a stub that throws. Never add `browser` here.
   ssr: {
     noExternal: true,
-    resolve: { conditions: ['solid', 'node', 'development'] },
   },
 });
 
-// The entry is loaded *through* Vite, and it imports both `solid-js/web` and the library itself.
+// The entry is loaded *through* Vite, and it imports both `@solidjs/web` and the library itself.
 // That is load-bearing: `ssr.noExternal` gives Vite's module graph its own copy of `solid-js`,
-// so a `renderToStringAsync` imported out here in the host process would be a DIFFERENT instance
+// so a `renderToString` imported out here in the host process would be a DIFFERENT instance
 // than the one the component was compiled against. Solid keeps owner/`sharedConfig` state at
 // module scope, so the two copies do not share it — a trivial component survives that, but
 // anything using `createContext`/`createStore`/`createEffect` (i.e. `QueryBuilder`, from step 4)
 // does not. Keep the render inside the graph.
 const entry = resolve(packageRoot, 'scripts/ssr-smoke-entry.jsx');
 const mod = await vite.ssrLoadModule(entry);
-const html: string = await mod.render();
+const html: string = mod.render();
 
 await vite.close();
 

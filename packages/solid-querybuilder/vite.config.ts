@@ -13,7 +13,7 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['solid-js', /^solid-js\//, /^@react-querybuilder\/core/],
+      external: ['solid-js', /^solid-js\//, /^@solidjs\//, /^@react-querybuilder\/core/],
       output: {
         preserveModules: true,
         preserveModulesRoot: 'src',
@@ -23,21 +23,16 @@ export default defineConfig({
     // `build:source`/`build:types`/`build:css` write into the same directory afterward.
     emptyOutDir: true,
   },
-  resolve: {
-    // The test env must resolve the development, browser build of `solid-js`, or components
-    // silently get the server runtime and nothing renders.
-    conditions: ['development', 'browser'],
-  },
+  // No hand-written `resolve.conditions`: vite-plugin-solid@3 sets them per environment, and a
+  // hand-maintained list only removes entries. `Placeholder.test.tsx` guards the result.
   test: {
     name: 'solid-querybuilder',
     environment: 'jsdom',
     globals: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     setupFiles: ['./vitest-setup.ts'],
-    // NOTE: no `server.deps.inline: [/solid-js/]`. The plan designates that a *fallback* for
-    // the case where Vitest externalizes `solid-js`; `resolve.conditions` above is sufficient,
-    // and inlining speculatively risks a second Solid instance in the test env. If a component
-    // ever renders an empty container, or `createContext`/`createStore` identities diverge,
-    // that is the symptom to re-add it for.
+    // No `server.deps.inline: [/solid-js/]` — a fallback for when Vitest externalizes `solid-js`,
+    // and inlining speculatively risks a second Solid instance. Symptoms that would justify it:
+    // an empty render container, or diverging `createContext`/`createStore` identities.
   },
 });

@@ -11,7 +11,8 @@
     "build": "bun run --filter solid-querybuilder build",
     "check": "bun run --filter solid-querybuilder check",
     "check:exports": "bun run --filter solid-querybuilder check:exports",
-    "check:all": "bun run fmt:check && bun run build && bun run check && bun run check:exports && bun run lint && bun run test:coverage && bun run conformance && bun run test:ssr",
+    "check:versions": "bun run --filter solid-querybuilder check:versions",
+    "check:all": "bun run check:versions && bun run fmt:check && bun run build && bun run check && bun run check:exports && bun run lint && bun run test:coverage && bun run conformance && bun run test:ssr",
     "lint": "oxlint",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
@@ -23,7 +24,8 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@solidjs/testing-library": "^0.8.10",
+    "@solidjs/testing-library": "1.0.0-beta.2",
+    "@solidjs/web": "2.0.0-beta.32",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/user-event": "^14.6.3",
     "@types/bun": "^1.3.14",
@@ -33,10 +35,10 @@
     "oxfmt": "^0.62.0",
     "oxlint": "^1.77.0",
     "sass": "^1.102.0",
-    "solid-js": "^1.9.14",
+    "solid-js": "2.0.0-beta.32",
     "typescript": "^5.9.3",
     "vite": "^8.2.0",
-    "vite-plugin-solid": "^2.11.14",
+    "vite-plugin-solid": "3.0.0-next.23",
     "vitest": "^4.1.10",
     "vitest-axe": "^0.1.0"
   }

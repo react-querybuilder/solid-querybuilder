@@ -11,8 +11,11 @@ byte-identical DOM output.
 npm install solid-querybuilder
 ```
 
-`solid-js@^1.9 || ^2.0.0-0` is a peer dependency. `@react-querybuilder/core` is a regular
-dependency and is re-exported in full, so you never need to depend on it directly.
+`solid-js@^2.0.0-beta.32` and `@solidjs/web@^2.0.0-beta.32` are peer dependencies — this package
+targets **Solid 2 only**, where the DOM runtime ships as its own package. Install `@solidjs/web`
+from the `next` dist-tag; its `latest` tag is `2.0.0-experimental.0`, an incompatible line.
+`@react-querybuilder/core` is a regular dependency and is re-exported in full, so you never need
+to depend on it directly.
 
 ## Quick start
 
