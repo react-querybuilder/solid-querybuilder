@@ -218,6 +218,42 @@ it passes whether or not the `snapshot()` is there:
 - A subquery renders **bare `<div>`s** for its group header/body, not a `rule-group` element
   (React's `RuleWithSubQueryGroupComponentsWrapper`), and it is not customizable.
 
+### The conformance harness (step 6)
+
+`vitest.conformance.config.ts` runs **two projects**, because the two fixture layers demand
+opposite render modes. This is structural, not cosmetic — one plugin instance cannot serve both.
+
+| Project           | Compilation                            | Environment | Renders                                                                                 |
+| ----------------- | -------------------------------------- | ----------- | --------------------------------------------------------------------------------------- |
+| `conformance-ssr` | `generate: 'ssr'`, `hydratable: false` | `node`      | `renderToString`, controlled `query` — the **static** layer                             |
+| `conformance-dom` | default `dom`                          | `jsdom`     | testing-library + `flush()`, **uncontrolled** `defaultQuery` — the **post-flush** layer |
+
+- **The static layer is rendered server-side deliberately.** The fixtures come from
+  `renderToStaticMarkup` with no effects run; Solid's client `render()` runs effects, so the
+  "extract before the scheduler flushes" trick both prior ports used is unavailable. SSR runs no
+  effects at all, so this is an _exact_ match rather than an approximation — and it exercises the
+  ssr path in all 50 cases for free.
+- ⚠️ **`solid({ ssr: true, … })` on the ssr project is load-bearing** and is _not_ redundant with
+  `solid: { generate: 'ssr' }`. `vite-plugin-solid@3` injects a `browser` condition in test mode
+  (`isTestMode && !options.ssr`), `@solidjs/web` lists `browser` before `node`, and the browser
+  build's `renderToString` is a stub returning `undefined`. `ssr: true` suppresses the injection
+  (and the plugin's forced `environment: 'jsdom'`); `options.solid` merges last, so the explicit
+  `generate`/`hydratable` still win. Do **not** "fix" this by hand-writing `resolve.conditions`.
+- **`hydratable: false`** — hydration keys land as _attributes_ and would break byte-identical
+  `class` comparison. (Marker comments are ignored by extraction; attributes are not.)
+- **`cases.ts` carries no rendering.** The render helpers are split into `render-ssr.tsx` and
+  `render-dom.tsx` so the ssr project never imports `@solidjs/testing-library` and vice versa.
+- **`scenarios.tsx`, not `.ts`** — `getValueEditorSeparator` returns JSX, which each project must
+  compile for its own target.
+- ⚠️ **`actions.solid.test.ts` must `flush()` once after `createRoot` before replaying.** Effects
+  created inside a root are queued, not run eagerly, so the controlled-`query` sync effect's first
+  run otherwise lands on the flush _after_ the first op and silently reverts it. Found the hard
+  way: 4 of 19 cases failed with the ops apparently never applied.
+- `extract.ts` exposes both `extractFromContainer` and `extractFromMarkup` (upstream's
+  `schemaVersion` 2 split). The markup form builds its own `JSDOM` when there is no global
+  `DOMParser`, which is what lets the ssr project run in the `node` environment and thereby prove
+  a server render needs no document.
+
 ### Types
 
 - **`jsxImportSource` is `"@solidjs/web"`.** `solid-js@2` owns no JSX namespace and no
@@ -241,12 +277,30 @@ it passes whether or not the `snapshot()` is there:
 **Standing rule: every gate must be proven to fail.** When a step adds a gate, deliberately break
 it, record that it went red, then revert. A gate that cannot fail is worse than none.
 
-Current gates (step 8): `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
+Current gates (steps 6 + 8): `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
 `lint`, `test:coverage` (global 80% lines, plus a per-directory 90% lines on `packages/*/src/**` —
 widened at step 5 from the step-3 `packages/*/src/reactive/**`, which it subsumes; both
-non-vacuous, both proved red with no injected dead code), `test:ssr` (**both halves**), and
-`check` including the examples. (`conformance` is a stub that exits 0 until step 6; it is not a
-gate yet.)
+non-vacuous, both proved red with no injected dead code), **`conformance`** (237 assertions: 50
+static classnames, 50 accessible descriptions, 50 post-flush classnames, 58 action sequences, 19
+port-side action sequences, plus alignment/drift/format), `test:ssr` (**both halves**), and
+`check` including the examples.
+
+The four step-6 conformance gates were each proved red and reverted:
+
+1. **DOM parity** — ` conformance-gate-probe` appended to `ActionElement.tsx`'s class turned
+   exactly 100 cases red (50 static + 50 post-flush), which is the split the two projects promise.
+2. **`schemaVersion`** — `EXPECTED_SCHEMA_VERSION = 3` made `conformance:fetch` exit 1 with the
+   "update `test/conformance` before bumping the tag" message.
+3. **Scenario drift** — renaming the local `allControls` scenario turned the drift test (and the
+   three case-alignment tests) red while all 50 rendered cases stayed green.
+4. **Value-editor reset** — an early `return` in `createValueEditorReset`'s apply phase left
+   conformance at 237/237 green (as upstream predicts: every case is `differsFromStatic: false`)
+   while turning 5 of the 9 post-mount unit assertions red. That asymmetry is exactly why the
+   plan forbids proving this one through the post-flush fixture.
+
+Separately confirmed: with `test/fixtures/` removed, `bun run test` still passes 284/284 and
+`conformance:test` fails with the actionable "run `bun run conformance:fetch`" message rather than
+an opaque parse error.
 
 The step-8 example gate was proved red twice, independently, and reverted both times:
 `document.title` injected into `QueryBuilder.tsx` turned the served response into a 500 and took

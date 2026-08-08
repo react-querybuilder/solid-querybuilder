@@ -59,7 +59,9 @@
     "check:exports": "bun run ./scripts/check-dist-specifiers.ts && attw --pack . --profile esm-only",
     "check:versions": "bun run ./scripts/check-versions.ts",
     "test:ssr": "bun run ./scripts/ssr-smoke.ts",
-    "conformance": "echo 'conformance harness lands at step 6' && exit 0"
+    "conformance": "bun run conformance:fetch && bun run conformance:test",
+    "conformance:fetch": "bun ./scripts/fetch-fixtures.ts",
+    "conformance:test": "vitest run --config vitest.conformance.config.ts"
   },
   "peerDependencies": {
     "solid-js": "^2.0.0-beta.32",
