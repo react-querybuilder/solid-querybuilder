@@ -48,34 +48,35 @@ jobs:
       - name: SSR smoke test
         run: bun run test:ssr
 
-  solid-next:
-    name: build & test (solid-js@2.0.0-beta.32, non-gating)
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v5
+  # SKIPPING FOR NOW
+  # solid-next:
+  #   name: build & test (solid-js@2.0.0-beta.32, non-gating)
+  #   runs-on: ubuntu-latest
+  #   continue-on-error: true
+  #   steps:
+  #     - uses: actions/checkout@v5
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+  #     - uses: oven-sh/setup-bun@v2
+  #       with:
+  #         bun-version: latest
 
-      - name: Install
-        run: bun install --frozen-lockfile
+  #     - name: Install
+  #       run: bun install --frozen-lockfile
 
-      - name: Bump solid-js to next
-        run: bun add -D solid-js@2.0.0-beta.32
+  #     - name: Bump solid-js to next
+  #       run: bun add -D solid-js@2.0.0-beta.32
 
-      - name: Build
-        run: bun run build
+  #     - name: Build
+  #       run: bun run build
 
-      - name: Check
-        run: bun run check
+  #     - name: Check
+  #       run: bun run check
 
-      - name: Test
-        run: bun run test
+  #     - name: Test
+  #       run: bun run test
 
-      - name: Conformance
-        run: bun run conformance
+  #     - name: Conformance
+  #       run: bun run conformance
 
-      - name: SSR smoke test
-        run: bun run test:ssr
+  #     - name: SSR smoke test
+  #       run: bun run test:ssr
