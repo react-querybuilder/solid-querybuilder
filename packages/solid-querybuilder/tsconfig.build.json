@@ -1,0 +1,23 @@
+{
+  // Declaration-emit-only project: `src/` alone, no tests, no scripts, no config files.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": true,
+    "sourceMap": false,
+    "rootDir": "src",
+    "types": ["solid-js"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.test-d.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx"
+  ]
+}

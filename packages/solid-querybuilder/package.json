@@ -1,0 +1,79 @@
+{
+  "name": "solid-querybuilder",
+  "version": "0.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Solid component for complex query building",
+  "keywords": [
+    "solid",
+    "solidjs",
+    "query",
+    "builder",
+    "query-builder",
+    "filter",
+    "sql"
+  ],
+  "author": "Jake Boone",
+  "homepage": "https://github.com/react-querybuilder/solid-querybuilder",
+  "bugs": {
+    "url": "https://github.com/react-querybuilder/solid-querybuilder/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/react-querybuilder/solid-querybuilder.git",
+    "directory": "packages/solid-querybuilder"
+  },
+  "sideEffects": [
+    "*.css",
+    "*.scss"
+  ],
+  "files": [
+    "README.md",
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/*.test-d.*",
+    "!dist/**/*.spec.*"
+  ],
+  "exports": {
+    ".": {
+      "solid": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/source/index.jsx"
+      },
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./dist/*.css": "./dist/*.css",
+    "./dist/*.scss": "./dist/*.scss",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "prepack": "bun run ./scripts/copy-readme.ts",
+    "postpack": "rm -f README.md",
+    "build": "bun run build:main && bun run build:source && bun run build:types && bun run build:css",
+    "build:main": "vite build",
+    "build:source": "tsc -p tsconfig.source.json",
+    "build:types": "tsc -p tsconfig.build.json --emitDeclarationOnly --declarationDir dist && find dist \\( -name '*.test.*' -o -name '*.test-d.*' -o -name '*.spec.*' \\) -delete",
+    "build:css": "mkdir -p dist/styles && cp ../../node_modules/@react-querybuilder/core/dist/*.scss dist && cp ../../node_modules/@react-querybuilder/core/dist/styles/*.scss dist/styles && cp -f src/styles/*.scss dist/styles 2>/dev/null || true; bun sass --style=compressed dist",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "check:exports": "bun run ./scripts/check-dist-specifiers.ts && attw --pack . --profile esm-only",
+    "test:ssr": "bun run ./scripts/ssr-smoke.ts",
+    "conformance": "echo 'conformance harness lands at step 6' && exit 0"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.9 || ^2.0.0-0"
+  },
+  "dependencies": {
+    "@react-querybuilder/core": "^8.22.4"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "solid-js": "^1.9.14",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.0",
+    "vite-plugin-solid": "^2.11.14"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

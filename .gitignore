@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+coverage/
+
+# Conformance fixtures (downloaded by scripts/fetch-fixtures.ts)
+packages/solid-querybuilder/test/fixtures/
+*.tar.gz
+*.tar.gz.sha256
+
+# Misc
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+.idea
+.vscode/*
+!.vscode/extensions.json
+.tmp

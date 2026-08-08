@@ -1,0 +1,54 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "bracketSpacing": true,
+  "bracketSameLine": true,
+  "arrowParens": "avoid",
+  "embeddedLanguageFormatting": "auto",
+  "sortImports": {
+    "newlinesBetween": false,
+    "sortSideEffects": false,
+    "customGroups": [
+      { "groupName": "bun", "elementNamePattern": ["bun"] },
+      { "groupName": "bun:", "elementNamePattern": ["bun:*"] },
+      { "groupName": "node:", "elementNamePattern": ["node:*", "node:*/*"] }
+    ],
+    "groups": [
+      ["bun", "bun:", "node:"],
+      ["type-builtin", "value-builtin"],
+      ["type-external", "value-external"],
+      ["type-parent", "value-parent", "type-sibling", "value-sibling", "type-index", "value-index"],
+      "type-import",
+      "unknown"
+    ]
+  },
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "examples/*/**/*.*",
+    "packages/*/dist/**/*.*",
+    // Downloaded conformance fixtures
+    "packages/*/test/fixtures/**/*.*",
+    // Binaries
+    "*.jpeg",
+    "*.jpg",
+    "*.png",
+    "*.svg",
+    // Unsupported
+    "*.toml",
+    "*.sh",
+    "CNAME"
+  ],
+  "overrides": [
+    {
+      "files": ["packages/*/**/*.test.ts", "packages/*/test/**/*.ts"],
+      "options": {
+        "objectWrap": "collapse"
+      }
+    }
+  ]
+}
