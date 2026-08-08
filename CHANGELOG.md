@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-08
+
 ### Changed
 
 - **Retargeted the port to Solid 2.0 exclusively.** `peerDependencies` is now
@@ -92,3 +94,6 @@ Authoritative list: [`docs/differences-from-react-querybuilder.md`](./docs/diffe
 - Type substitutions: `ReactNode` → `LabelNode`, `ComponentType` → Solid's `Component`, `JSX` from
   `@solidjs/web`, React synthetic `MouseEvent` → the DOM `MouseEvent`, `Controls.undoRedoActions`
   non-nullable, `RuleProps.field` absent.
+
+[unreleased]: https://github.com/react-querybuilder/solid-querybuilder/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/react-querybuilder/solid-querybuilder/releases/tag/v0.1.0
