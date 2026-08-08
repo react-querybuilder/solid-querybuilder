@@ -1,0 +1,22 @@
+{
+  "name": "@solid-querybuilder/example-demo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@react-querybuilder/core": "^8.22.4",
+    "@solidjs/web": "2.0.0-beta.32",
+    "solid-js": "2.0.0-beta.32"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^8.2.0",
+    "vite-plugin-solid": "3.0.0-next.23"
+  }
+}

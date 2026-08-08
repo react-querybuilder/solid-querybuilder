@@ -19,7 +19,9 @@ solid-querybuilder/
 │   ├── src/                       # components, reactive layer, types, styles
 │   ├── test/conformance/          # DOM-parity harness (fixtures gitignored)
 │   └── scripts/                   # build/check/ssr-smoke helpers
-└── examples/                      # demo (Vite) and an SSR gate
+└── examples/
+    ├── demo/                      # Vite + Solid 2, aliased to the library's src
+    └── ssr/                       # hand-rolled Vite SSR consumer; the phase SSR gate
 ```
 
 **Target is Solid 2 only.** Peers are `solid-js@^2.0.0-beta.32` **and
@@ -42,10 +44,14 @@ standing rules that apply to every step.
 - `bun run conformance` — fetch fixtures, then run the DOM-parity suites
 - `bun run check:versions` — asserts the resolved prerelease toolchain has not drifted; runs
   first in CI
-- `bun run test:ssr` — resolves the `solid` export condition and renders through
-  `renderToString`; a real gate from step 1, superseded (but not replaced) by the SSR gate at
-  step 8
-- `bun run check` — `tsc --noEmit`
+- `bun run test:ssr` — **two halves, in sequence.** First `packages/solid-querybuilder`'s
+  `scripts/ssr-smoke.ts` (the step-1 script: export-condition order in isolation, plus a markup
+  assertion). Then `examples/ssr`'s `ssr-smoke-test.ts` (step 8: builds the example against the
+  published `dist`, serves it, asserts status + markup, then hydrates in jsdom). Step 8
+  **supersedes but does not replace** the first — keep both; only the first checks the export
+  condition in isolation.
+- `bun run check` — `tsc --noEmit`, then `check:examples`, which fans the same out to
+  `@solid-querybuilder/example-*` so an example type error breaks CI
 - `bun run lint`, `bun run fmt`, `bun run fmt:check`
 - `bun run check:all` — everything CI runs
 
@@ -90,6 +96,38 @@ whose `renderToString` is a stub. Never add `browser`.
 
 The entry is `.jsx`, not `.tsx`, deliberately: it stays out of the typecheck project so
 `bun run check` does not depend on `dist/` existing.
+
+### The examples
+
+`examples/demo` aliases the library's **source**, `examples/ssr` consumes the built **`dist`** by
+workspace specifier. That split is deliberate: the demo gives HMR without a build, and the SSR
+example is the only thing in the repo that exercises the publishable artifact end to end.
+
+- **Demo alias order matters.** The `solid-querybuilder/dist/*.css` alias must come **before** the
+  bare-specifier alias in the `resolve.alias` array, or the bare specifier rewrites first and the
+  CSS path is swallowed **[Vue hindsight]**.
+- **`examples/ssr` bundles the library into the server output** (`ssr.noExternal`). Node has no
+  `solid` condition, so an externalized `solid-querybuilder` would resolve through `import` to the
+  dom-compiled bundle and render nothing server-side.
+- **The SSR server is started programmatically on an ephemeral port, never by spawning a CLI.** A
+  spawned preview leaves an orphan holding the port and serving a stale build, silently poisoning
+  the next run — caught in Phase 1, hit again in Phase 2.
+- **The hydration half runs both scripts in-process, not in jsdom.** `runScripts: 'dangerously'` is
+  a dead end: jsdom's vm global trips Bun with "Proxy is not allowed in the global prototype
+  chain", and it cannot execute the `type="module"` client bundle anyway. The inline
+  `generateHydrationScript()` output runs through `new Function` (it assigns `_$HY` unqualified, so
+  a sloppy-mode body lands it on `globalThis` — do not "fix" that by copying `window._$HY` over it,
+  which overwrites it with `undefined`), and the client bundle runs through `import()` against
+  jsdom's globals.
+- **`generateHydrationScript()` must be in the document.** Without it the client entry dies on
+  `_$HY.done` before it can report a mismatch, and the hydration gate passes vacuously.
+
+### The barrel re-exports core at runtime
+
+`src/index.tsx` does `export * from '@react-querybuilder/core'`, not just `export type *`. A
+consumer calls `formatQuery` from `solid-querybuilder` and never depends on core directly, exactly
+as React Query Builder's own barrel works. Step 3's plan called for this; `examples/ssr` is what
+proved it missing at step 8.
 
 ### Relative import specifiers
 
@@ -203,11 +241,18 @@ it passes whether or not the `snapshot()` is there:
 **Standing rule: every gate must be proven to fail.** When a step adds a gate, deliberately break
 it, record that it went red, then revert. A gate that cannot fail is worse than none.
 
-Current gates (step 5): `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
+Current gates (step 8): `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
 `lint`, `test:coverage` (global 80% lines, plus a per-directory 90% lines on `packages/*/src/**` —
 widened at step 5 from the step-3 `packages/*/src/reactive/**`, which it subsumes; both
-non-vacuous, both proved red with no injected dead code), `test:ssr`. (`conformance` is a stub
-that exits 0 until step 6; it is not a gate yet.)
+non-vacuous, both proved red with no injected dead code), `test:ssr` (**both halves**), and
+`check` including the examples. (`conformance` is a stub that exits 0 until step 6; it is not a
+gate yet.)
+
+The step-8 example gate was proved red twice, independently, and reverted both times:
+`document.title` injected into `QueryBuilder.tsx` turned the served response into a 500 and took
+19 assertions with it; a one-attribute divergence in `examples/ssr/src/entry-client.tsx` turned the
+hydration surface comparison red while every markup assertion stayed green. Those two failure
+modes share no code, which is the point of having both.
 
 All five were proven red at step 1 and reverted: coverage (threshold to 99 + an injected
 uncovered function), export-condition **order** (`import` moved first), export-condition

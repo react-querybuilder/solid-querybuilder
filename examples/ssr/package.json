@@ -1,0 +1,26 @@
+{
+  "name": "@solid-querybuilder/example-ssr",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --ssr src/entry-server.tsx --outDir dist/server && vite build --outDir dist/client",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "test:ssr": "bun run ./ssr-smoke-test.ts"
+  },
+  "dependencies": {
+    "@react-querybuilder/core": "^8.22.4",
+    "@solidjs/web": "2.0.0-beta.32",
+    "solid-js": "2.0.0-beta.32",
+    "solid-querybuilder": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^26.1.2",
+    "jsdom": "^30.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.0",
+    "vite-plugin-solid": "3.0.0-next.23"
+  }
+}

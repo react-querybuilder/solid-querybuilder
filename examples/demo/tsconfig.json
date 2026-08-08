@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Core's declarations carry type-only imports of optional integrations (`json-logic-js`,
+    // `drizzle-orm`, `sequelize`, `@tanstack/db`) that are not installed here. [both ports]
+    "skipLibCheck": true,
+    "types": ["vite/client"],
+    "paths": {
+      "solid-querybuilder": ["../../packages/solid-querybuilder/src/index.tsx"],
+      "solid-querybuilder/dist/*": ["../../node_modules/@react-querybuilder/core/dist/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "*.ts"],
+  "exclude": ["dist", "node_modules"]
+}

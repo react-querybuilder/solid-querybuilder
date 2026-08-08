@@ -30,3 +30,49 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   it asserts the `solid` condition is **first** in the exports map and confirms that with Node's
   real resolver run with and without `--conditions=solid`, then renders through Vite's SSR
   pipeline inside a single Solid instance and asserts the exact markup.
+- `examples/demo` — a Vite + Solid 2 playground aliased to the library's **source** (HMR without a
+  build). Eight fields covering all seven value editors, two separately bound queries
+  (`RuleGroupType` and `RuleGroupTypeIC`) behind an independent-combinators toggle that swaps query
+  _shapes_, every display flag, undo/redo, and live `formatQuery` in `sql`/`json`/`mongodb`/`cel`.
+- `examples/ssr` — a hand-rolled Vite SSR consumer that depends on `solid-querybuilder` by
+  workspace specifier, so it exercises the publishable `dist` through the real `exports` map. It
+  server-renders a nested independent-combinators query with `renderToString`, passes one control
+  through `controlElements`, prints a server-side `formatQuery` result into the markup, and
+  hydrates on the client.
+- `examples/ssr/ssr-smoke-test.ts`, wired into root `test:ssr` after (not instead of)
+  `scripts/ssr-smoke.ts`. It builds both bundles, serves them programmatically on an ephemeral
+  port, asserts the status code **and** 20 markup claims, then loads the served page into jsdom,
+  runs the client entry, and asserts hydration produced no errors and left the conformance surface
+  unchanged.
+- Root `check` now fans out to `@solid-querybuilder/example-*`, so an example type error breaks CI.
+- `README.md` gains a prominent "Requires Solid 2.0" note, documentation links, and an examples
+  section; new `docs/differences-from-react-querybuilder.md`, `docs/styling.md`, and
+  `docs/customization.md`.
+
+### Fixed
+
+- `src/index.tsx` re-exports `@react-querybuilder/core` **at runtime**, not just at the type level.
+  Step 3 called for this and it was never landed; `examples/ssr` found it by failing to build on
+  `import { formatQuery } from 'solid-querybuilder'`. Consumers can now use core's formatters,
+  defaults, and `QueryManager` without depending on core directly, as React Query Builder's own
+  barrel allows.
+
+### Changed (divergences from React Query Builder)
+
+Authoritative list: [`docs/differences-from-react-querybuilder.md`](./docs/differences-from-react-querybuilder.md).
+
+- **No SolidStart SSR gate.** `@solidjs/start@2.0.0` is a Solid **1** release (it depends on
+  `solid-js@^1.9.14`) and there is no Solid-2 line on any dist-tag, so the planned SolidStart
+  example is replaced by `examples/ssr`. Known gap: no router, no server functions, no
+  meta-framework build pipeline, and the server-side `formatQuery` call is a plain call in the SSR
+  entry rather than a server function or API route. `examples/ssr` is replaced by SolidStart when a
+  Solid-2 line ships; tracked post-`0.1.0`, and `0.1.0` is not held for it.
+- No Redux store, no `qbId`, no `dispatchQuery`, no `preserveQueryStateOnUnmount`. External control
+  is the `manager` prop plus the veto callbacks.
+- No slot or snippet customization tier — `controlElements` is the only one, because a component is
+  the Solid idiom.
+- Not ported: drag and drop, UI compatibility packages, `expr`/`datetime` value editor UI, async
+  option lists, deprecated props, `ruleGroupHeaderElements`/`ruleGroupBodyElements`, `DragHandle`.
+- Type substitutions: `ReactNode` → `LabelNode`, `ComponentType` → Solid's `Component`, `JSX` from
+  `@solidjs/web`, React synthetic `MouseEvent` → the DOM `MouseEvent`, `Controls.undoRedoActions`
+  non-nullable, `RuleProps.field` absent.

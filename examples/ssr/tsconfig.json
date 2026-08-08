@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Core's declarations carry type-only imports of optional integrations (`json-logic-js`,
+    // `drizzle-orm`, `sequelize`, `@tanstack/db`) that are not installed here, so a full lib check
+    // fails on the dependency, not on this code. [both ports] Re-verify this class of problem in
+    // step 9's `attw` run.
+    "skipLibCheck": true,
+    "types": ["node", "vite/client"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "*.ts"],
+  "exclude": ["dist", "node_modules"]
+}
