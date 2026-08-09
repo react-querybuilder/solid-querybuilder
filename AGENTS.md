@@ -10,7 +10,7 @@ The package `solid-querybuilder` is a **Solid 2.0** port of
 document order, `data-testid`, `data-path`, and byte-identical `class` attributes must match
 React Query Builder's output for all conformance cases.
 
-Blueprints: `svelte-querybuilder@0.1.1` (Phase 1) and `@react-querybuilder/vue@0.2.0` (Phase 2).
+Blueprints: `svelte-querybuilder@0.1.1` and `@react-querybuilder/vue@0.2.0`.
 Deviate only where Solid idiom demands.
 
 ```
@@ -21,7 +21,7 @@ solid-querybuilder/
 │   └── scripts/                   # build/check/ssr-smoke helpers
 └── examples/
     ├── demo/                      # Vite + Solid 2, aliased to the library's src
-    └── ssr/                       # hand-rolled Vite SSR consumer; the phase SSR gate
+    └── ssr/                       # hand-rolled Vite SSR consumer; the SSR gate
 ```
 
 **Target is Solid 2 only.** Peers are `solid-js@^2.0.0-beta.32` **and
@@ -32,8 +32,7 @@ shims or `solid-js@1` code paths here.
 
 Wiring strategy is **hybrid**: `QueryManager` owns every write (history, guards, `reconfigure`);
 an internal store mirror (`reconcile`d by `id`) is the read path. See
-`~/git/SOLID_QB_PLAN.md` for the full rationale and step-by-step plan; this file only records the
-standing rules that apply to every step.
+`~/git/SOLID_QB_PLAN.md` for the full rationale; this file only records the standing rules.
 
 ## Commands
 
@@ -45,11 +44,10 @@ standing rules that apply to every step.
 - `bun run check:versions` — asserts the resolved prerelease toolchain has not drifted; runs
   first in CI
 - `bun run test:ssr` — **two halves, in sequence.** First `packages/solid-querybuilder`'s
-  `scripts/ssr-smoke.ts` (the step-1 script: export-condition order in isolation, plus a markup
-  assertion). Then `examples/ssr`'s `ssr-smoke-test.ts` (step 8: builds the example against the
-  published `dist`, serves it, asserts status + markup, then hydrates in jsdom). Step 8
-  **supersedes but does not replace** the first — keep both; only the first checks the export
-  condition in isolation.
+  `scripts/ssr-smoke.ts` (export-condition order in isolation, plus a markup assertion). Then
+  `examples/ssr`'s `ssr-smoke-test.ts` (builds the example against the published `dist`, serves
+  it, asserts status + markup, then hydrates in jsdom). The second **supersedes but does not
+  replace** the first — keep both; only the first checks the export condition in isolation.
 - `bun run check` — `tsc --noEmit`, then `check:examples`, which fans the same out to
   `@solid-querybuilder/example-*` so an example type error breaks CI
 - `bun run lint`, `bun run fmt`, `bun run fmt:check`
@@ -72,10 +70,10 @@ package that renders fine in the browser and silently breaks SSR/hydration.
 A key _lookup_ (`exports['.'].solid`) is order-blind and does not gate anything — do not
 regress it back to that.
 
-Keep the script even after step 8 supersedes it with the SolidStart gate; it is the only thing
-that checks the export condition in isolation. (There is no Solid 2 SolidStart yet — step 8's
-gate is a plain Vite SSR example — but the export condition is what that gate rests on either
-way.)
+Keep the script even though the SolidStart gate would supersede it; it is the only thing
+that checks the export condition in isolation. (There is no Solid 2 SolidStart yet — the
+example's gate is a plain Vite SSR example — but the export condition is what that gate rests on
+either way.)
 
 ### The SSR smoke test runs one Solid instance
 
@@ -85,7 +83,7 @@ own copy of `solid-js`, so importing `renderToString` in the host process instea
 with a _different instance_ than the component was compiled against. Solid keeps
 owner/`sharedConfig` state at module scope, so the copies do not share it — a trivial component
 survives this, but anything using `createContext`/`createStore`/`createEffect` (i.e.
-`QueryBuilder`, from step 4) does not.
+`QueryBuilder`) does not.
 
 **Conditions are the plugin's job now, not the config's.** `vite-plugin-solid@3` gives the ssr
 environment `['solid', 'development', 'module', 'node', 'development|production']` on its own, so
@@ -111,7 +109,7 @@ example is the only thing in the repo that exercises the publishable artifact en
   dom-compiled bundle and render nothing server-side.
 - **The SSR server is started programmatically on an ephemeral port, never by spawning a CLI.** A
   spawned preview leaves an orphan holding the port and serving a stale build, silently poisoning
-  the next run — caught in Phase 1, hit again in Phase 2.
+  the next run.
 - **The hydration half runs both scripts in-process, not in jsdom.** `runScripts: 'dangerously'` is
   a dead end: jsdom's vm global trips Bun with "Proxy is not allowed in the global prototype
   chain", and it cannot execute the `type="module"` client bundle anyway. The inline
@@ -126,8 +124,7 @@ example is the only thing in the repo that exercises the publishable artifact en
 
 `src/index.tsx` does `export * from '@react-querybuilder/core'`, not just `export type *`. A
 consumer calls `formatQuery` from `solid-querybuilder` and never depends on core directly, exactly
-as React Query Builder's own barrel works. Step 3's plan called for this; `examples/ssr` is what
-proved it missing at step 8.
+as React Query Builder's own barrel works. `examples/ssr` is what proved a gap here in review.
 
 ### Relative import specifiers
 
@@ -153,7 +150,7 @@ type-only module erased by the bundler), and allows `./foo.jsx` under `dist/sour
 - **Split effects, not `on()`.** `on()` is gone; `createEffect(compute, apply)` makes the compute
   phase the dependency declaration, so the old "always use `on`" rule is now enforced by the API
   shape. Deps in compute, writes in apply. `{ defer: true }` survives as an option.
-- **Apply-phase writes are legal — no `ownedWrite` needed** (proven at step 1.5). The owned-write
+- **Apply-phase writes are legal — no `ownedWrite` needed.** The owned-write
   rule rejects writes made while an owner is on the stack, and the apply phase is unowned. Note
   `ownedWrite` is a **signal** option, not an effect option; `createEffect` has no such option.
 - ⚠️ **The body of `createRoot(fn)` IS an owned scope.** A write there throws
@@ -187,8 +184,8 @@ setX(v)` returns the setter's return value and throws "invalid cleanup value". U
   shape and throws.
 - `createProjection(fn, seed, options?)` is a derived, **read-only** store with the same `'id'`
   default key. It can be driven from a non-reactive external source (the manager's subscribe
-  callback) by bumping a version signal from that callback and reading the signal in `fn` — proven
-  at step 1.5, and it is what `createQueryBuilderState` uses (step 3).
+  callback) by bumping a version signal from that callback and reading the signal in `fn`; this is
+  what `createQueryBuilderState` uses.
 - `createStore`'s setter takes a **draft callback** (`setStore(draft => { draft.x = … })`). There is
   no 1.x `setStore('key', value)` path-argument form; it throws `fn is not a function`.
 
@@ -218,7 +215,7 @@ it passes whether or not the `snapshot()` is there:
 - A subquery renders **bare `<div>`s** for its group header/body, not a `rule-group` element
   (React's `RuleWithSubQueryGroupComponentsWrapper`), and it is not customizable.
 
-### The conformance harness (step 6)
+### The conformance harness
 
 `vitest.conformance.config.ts` runs **two projects**, because the two fixture layers demand
 opposite render modes. This is structural, not cosmetic — one plugin instance cannot serve both.
@@ -268,24 +265,24 @@ opposite render modes. This is structural, not cosmetic — one plugin instance 
   `RuleTypeOf<RG>` helper, and no re-widening cast inside components (all of which Vue needed).
 - `src/types/types.test-d.ts` is compiled by `tsc` (`bun run check`), **not** run by Vitest. It is
   a **two-sided** gate: a failed assertion errors, and an `@ts-expect-error` that stops erroring
-  (member quietly re-added) errors as `TS2578`. Both directions proven at step 2.
+  (member quietly re-added) errors as `TS2578`. Both directions are proven.
 - **TypeScript is pinned to `^5.9`.** Neither `vite-plugin-solid`'s babel preset nor the
   declaration pipeline is validated against TypeScript 7.
 
 ## Gates
 
-**Standing rule: every gate must be proven to fail.** When a step adds a gate, deliberately break
+**Standing rule: every gate must be proven to fail.** When a gate is added, deliberately break
 it, record that it went red, then revert. A gate that cannot fail is worse than none.
 
-Current gates (steps 6 + 7 + 8): `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
-`lint`, `test:coverage` (global 80% lines, plus a per-directory 90% lines on `packages/*/src/**` —
-widened at step 5 from the step-3 `packages/*/src/reactive/**`, which it subsumes; both
+Current gates: `check:versions`, `fmt:check`, `build`, `check`, `check:exports`,
+`lint`, `test:coverage` (global 80% lines, plus a per-directory 90% lines on `packages/*/src/**`,
+which subsumes the narrower `packages/*/src/reactive/**` key; both
 non-vacuous, both proved red with no injected dead code), **`conformance`** (237 assertions: 50
 static classnames, 50 accessible descriptions, 50 post-flush classnames, 58 action sequences, 19
 port-side action sequences, plus alignment/drift/format), `test:ssr` (**both halves**), and
 `check` including the examples.
 
-The step-7 a11y gate was proved red and reverted: deleting the `title` binding from
+The a11y gate was proved red and reverted: deleting the `title` binding from
 `ValueSelector.tsx` turned **all nine** axe cases red on the **WCAG** assertion (`select-name`, a
 level-A violation, not merely a best-practice one) while all three keyboard tests stayed green.
 Note the best-practice assertion is an **equality** check against `['label-title-only']`, not a
@@ -293,7 +290,7 @@ suppression — RQB labels selectors and text editors with `title` alone and DOM
 that one rule is accepted (recorded under "Known limitations" in `CHANGELOG.md`) while any _other_
 best-practice regression still fails.
 
-The four step-6 conformance gates were each proved red and reverted:
+The four conformance gates were each proved red and reverted:
 
 1. **DOM parity** — ` conformance-gate-probe` appended to `ActionElement.tsx`'s class turned
    exactly 100 cases red (50 static + 50 post-flush), which is the split the two projects promise.
@@ -303,28 +300,28 @@ The four step-6 conformance gates were each proved red and reverted:
    three case-alignment tests) red while all 50 rendered cases stayed green.
 4. **Value-editor reset** — an early `return` in `createValueEditorReset`'s apply phase left
    conformance at 237/237 green (as upstream predicts: every case is `differsFromStatic: false`)
-   while turning 5 of the 9 post-mount unit assertions red. That asymmetry is exactly why the
-   plan forbids proving this one through the post-flush fixture.
+   while turning 5 of the 9 post-mount unit assertions red. That asymmetry is exactly why this one
+   cannot be proved through the post-flush fixture alone.
 
 Separately confirmed: with `test/fixtures/` removed, `bun run test` still passes 284/284 and
 `conformance:test` fails with the actionable "run `bun run conformance:fetch`" message rather than
 an opaque parse error.
 
-The step-8 example gate was proved red twice, independently, and reverted both times:
+The example gate was proved red twice, independently, and reverted both times:
 `document.title` injected into `QueryBuilder.tsx` turned the served response into a 500 and took
 19 assertions with it; a one-attribute divergence in `examples/ssr/src/entry-client.tsx` turned the
 hydration surface comparison red while every markup assertion stayed green. Those two failure
 modes share no code, which is the point of having both.
 
-All five were proven red at step 1 and reverted: coverage (threshold to 99 + an injected
+All five were proven red once and reverted: coverage (threshold to 99 + an injected
 uncovered function), export-condition **order** (`import` moved first), export-condition
 **target** (`solid` repointed at `dist/index.js`), the SSR **markup** assertion (component's label
 dropped), and `check-dist-specifiers` (a directory import appended to `dist/index.d.ts`).
 
-**Four of the five were re-proved red on the Solid 2 toolchain at step 1.5** — a gate proved red
+**Four of the five were re-proved red on the Solid 2 toolchain** — a gate proved red
 under Solid 1 is not evidence about Solid 2, since the plugin, the resolver behavior and the SSR
 renderer all changed. Coverage, condition **order** (both layers fired), condition **target**, and
-SSR **markup** under the new synchronous `renderToString`. `check-dist-specifiers` is unaffected by
+SSR **markup** under the synchronous `renderToString`. `check-dist-specifiers` is unaffected by
 the runtime swap; it was re-run against the rebuilt `dist` instead.
 
 ⚠️ Two assertion shapes that look like gates but are not, both found and removed in review — do
@@ -337,8 +334,8 @@ not reintroduce them:
   Build distinctness is now covered properly by the two Node resolutions in `test:ssr`.
 
 ⚠️ Coverage-gate proof caveat: with `src/index.ts` a pure `export *`, v8 reports `0/0` and the
-threshold passes vacuously. The step-1 proof must also inject an uncovered multi-line function
-body to demonstrate the gate is live; non-vacuity is re-confirmed for real at step 3.
+threshold passes vacuously. The proof must also inject an uncovered multi-line function
+body to demonstrate the gate is live; non-vacuity is re-confirmed against real reactive-layer code.
 
 ## Coverage
 
@@ -348,8 +345,8 @@ is how CI runs it.
 
 ## Generated / fetched files
 
-- `packages/solid-querybuilder/test/fixtures/` — downloaded by `scripts/fetch-fixtures.ts` (added
-  at step 6), gitignored. A fresh clone must pass `bun run test` without them.
+- `packages/solid-querybuilder/test/fixtures/` — downloaded by `scripts/fetch-fixtures.ts`,
+  gitignored. A fresh clone must pass `bun run test` without them.
 
 ## Repo status
 

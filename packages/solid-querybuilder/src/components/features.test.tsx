@@ -31,7 +31,7 @@ const testIDs = (el: Element): (string | null)[] =>
   [...el.children].map(c => c.getAttribute('data-testid'));
 
 /**
- * The feature surface completed at Milestone B. Every one of these is cheap — core does the
+ * The full feature surface. Every one of these is cheap — core does the
  * work — but each is a distinct prop path from `QueryBuilder` to a rendered control, and none of
  * them was reachable before the remaining controls existed.
  */

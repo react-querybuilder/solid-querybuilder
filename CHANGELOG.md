@@ -70,7 +70,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - `src/index.tsx` re-exports `@react-querybuilder/core` **at runtime**, not just at the type level.
-  Step 3 called for this and it was never landed; `examples/ssr` found it by failing to build on
+  `examples/ssr` found the gap by failing to build on
   `import { formatQuery } from 'solid-querybuilder'`. Consumers can now use core's formatters,
   defaults, and `QueryManager` without depending on core directly, as React Query Builder's own
   barrel allows.

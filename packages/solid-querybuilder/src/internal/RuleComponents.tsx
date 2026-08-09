@@ -17,7 +17,7 @@ export interface SubQueryParts {
 /**
  * The controls inside a rule's outer `<div>`.
  *
- * Split out of `Rule` at step 5 because `RuleSubQuery` renders the same set with a subquery's
+ * Split out of `Rule` because `RuleSubQuery` renders the same set with a subquery's
  * group header and body interleaved. Takes `{ ruleProps, parts }` — see `RuleGroupHeader` for
  * why the two halves are not flattened.
  *

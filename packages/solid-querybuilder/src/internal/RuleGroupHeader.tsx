@@ -8,7 +8,7 @@ import type { RuleGroupProps } from '../types/props.js';
 /**
  * The contents of a group's header `<div>`.
  *
- * Split out of `RuleGroup` at step 5 because `RuleSubQuery` renders the same header for a
+ * Split out of `RuleGroup` because `RuleSubQuery` renders the same header for a
  * subquery's root group, in the middle of a rule's controls. It takes `{ groupProps, parts }`
  * rather than a flattened props object: the two halves have overlapping member names, and
  * flattening them was a documented source of confusion in the Vue port.

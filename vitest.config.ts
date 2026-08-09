@@ -15,7 +15,7 @@ export default defineConfig({
         // The library source is held to a higher bar than the repo as a whole. A glob key is
         // scoped to the files it matches and fails independently of the global threshold above.
         //
-        // This replaces the narrower `packages/*/src/reactive/**` key from step 3: the reactive
+        // This replaces a narrower `packages/*/src/reactive/**` key: the reactive
         // layer is no longer the only load-bearing directory now that the component tier is
         // complete, and the wider glob subsumes it.
         'packages/*/src/**': {

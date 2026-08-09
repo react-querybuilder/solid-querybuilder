@@ -9,7 +9,7 @@ import type { RuleGroupProps } from '../types/props.js';
 /**
  * The contents of a group's body `<div>`: its child rules and groups, plus inline combinators.
  *
- * Split out of `RuleGroup` at step 5 alongside `RuleGroupHeader`, for the same reason and with
+ * Split out of `RuleGroup` alongside `RuleGroupHeader`, for the same reason and with
  * the same `{ groupProps, parts }` shape.
  */
 export const RuleGroupBody = (props: {

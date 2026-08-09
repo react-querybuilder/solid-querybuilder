@@ -23,8 +23,8 @@ const ruleTestIDs = (container: Element): string[] =>
 
 describe('Rule', () => {
   /**
-   * The element-order contract. React's `Rule.tsx` is the spec; step 6's fixtures pin the class
-   * strings byte for byte, but *order* is asserted here, where a failure names the component.
+   * The element-order contract. React's `Rule.tsx` is the spec; the conformance fixtures pin the
+   * class strings byte for byte, but *order* is asserted here, where a failure names the component.
    *
    * A purely additive change — an extra class, an extra attribute — does not turn this red. Only
    * a reordering or a dropped control does.

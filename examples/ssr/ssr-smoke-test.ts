@@ -1,5 +1,5 @@
 /**
- * The Phase 3 SSR gate.
+ * The SSR gate.
  *
  * Replaces the SolidStart example the original plan called for: `@solidjs/start@2.0.0` is a
  * **Solid 1** release (it depends on `solid-js@^1.9`), and there is no Solid-2 line on any
@@ -22,8 +22,7 @@
  *
  * The server is started **programmatically on an ephemeral port**, never by spawning a CLI: a
  * spawned `vite preview` leaves an orphan holding the port and serving a stale build, which
- * silently poisons the next run. That was caught in development in Phase 1 and hit again in
- * Phase 2.
+ * silently poisons the next run.
  */
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';

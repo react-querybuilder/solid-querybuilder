@@ -1,6 +1,5 @@
 /**
- * Real gate from day one — not a placeholder. Both prior ports (Svelte, Vue) carried `test:ssr`
- * as a documented no-op until their step 8; Solid cannot afford that: the `solid` export
+ * Real gate from day one — not a placeholder. The `solid` export
  * condition is the single most Solid-specific way to ship a broken package, and it is invisible
  * until something renders server-side.
  *
@@ -13,11 +12,10 @@
  *    `renderToString` from `@solidjs/web` (synchronous in Solid 2), and assert the full
  *    markup.
  *
- * The component under test is `QueryBuilder` (step 4 repointed this from the step-1
- * `Placeholder`) — it exercises `createContext`, `createStore`, and `createEffect`, which is
- * what makes the single-Solid-instance requirement below load-bearing rather than theoretical.
- * Step 8 adds a SolidStart SSR gate but keeps this script, because it is the only thing that
- * checks the export condition in isolation.
+ * The component under test is `QueryBuilder` — it exercises `createContext`, `createStore`, and
+ * `createEffect`, which is what makes the single-Solid-instance requirement below load-bearing
+ * rather than theoretical. A SolidStart SSR gate would supersede this script but not replace it,
+ * because it is the only thing that checks the export condition in isolation.
  */
 import { existsSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
@@ -147,7 +145,7 @@ const vite = await createServer({
 // so a `renderToString` imported out here in the host process would be a DIFFERENT instance
 // than the one the component was compiled against. Solid keeps owner/`sharedConfig` state at
 // module scope, so the two copies do not share it — a trivial component survives that, but
-// anything using `createContext`/`createStore`/`createEffect` (i.e. `QueryBuilder`, from step 4)
+// anything using `createContext`/`createStore`/`createEffect` (i.e. `QueryBuilder`)
 // does not. Keep the render inside the graph.
 const entry = resolve(packageRoot, 'scripts/ssr-smoke-entry.jsx');
 const mod = await vite.ssrLoadModule(entry);

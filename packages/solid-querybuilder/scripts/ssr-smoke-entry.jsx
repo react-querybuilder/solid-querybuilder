@@ -6,9 +6,9 @@
  * call. The library is imported by BARE SPECIFIER on purpose: that exercises the `solid` export
  * condition the same way a real SSR consumer does.
  *
- * `QueryBuilder` (not a placeholder) since step 4: it uses `createContext`, `createStore`, and
- * `createEffect`, so it is also the thing that would break first if the two module graphs ever
- * stopped sharing one Solid instance.
+ * `QueryBuilder` is the real component under test (not a placeholder): it uses `createContext`,
+ * `createStore`, and `createEffect`, so it is also the thing that would break first if the two
+ * module graphs ever stopped sharing one Solid instance.
  *
  * Plain `.jsx`, not `.tsx`, so it stays out of the typecheck project — `bun run check` must not
  * depend on `dist/` existing.

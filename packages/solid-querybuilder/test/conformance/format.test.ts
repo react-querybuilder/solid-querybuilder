@@ -2,7 +2,7 @@
  * Round-trip conformance: a nested independent-combinator query survives
  * `formatQuery` → `parseSQL` → `formatQuery`.
  *
- * This is a Phase 1 exit criterion. It asserts nothing about rendering — it asserts that the
+ * It asserts nothing about rendering — it asserts that the
  * barrel re-export is complete enough for a consumer to do the whole round trip without a direct
  * `@react-querybuilder/core` dependency, and that IC queries survive it. `parseSQL` is a
  * subpath export of core rather than a barrel export, so it is imported the way a consumer
