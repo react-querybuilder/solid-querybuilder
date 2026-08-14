@@ -19,13 +19,13 @@ import * as path from 'node:path';
  * The upstream release whose fixtures this port is verified against. Bump deliberately, and
  * expect a diff in the conformance tests when you do.
  */
-export const CONFORMANCE_TAG = 'v8.22.4';
+export const CONFORMANCE_TAG = 'v8.23.0';
 
 /**
  * The fixture *shape* version. Not the tag: upstream may cut a dozen releases without changing
  * the schema, and a schema change must fail loudly rather than be mis-read.
  */
-export const EXPECTED_SCHEMA_VERSION = 2;
+export const EXPECTED_SCHEMA_VERSION = 3;
 
 const ASSET = 'rqb-conformance-fixtures.tar.gz';
 const RELEASE_URL = `https://github.com/react-querybuilder/react-querybuilder/releases/download/${CONFORMANCE_TAG}`;

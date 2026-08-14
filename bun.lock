@@ -29,7 +29,7 @@
       "name": "@solid-querybuilder/example-demo",
       "version": "0.0.0",
       "dependencies": {
-        "@react-querybuilder/core": "^8.22.5",
+        "@react-querybuilder/core": "^8.23.0",
         "@solidjs/web": "2.0.0-rc.0",
         "solid-js": "2.0.0-rc.0",
       },
@@ -43,7 +43,7 @@
       "name": "@solid-querybuilder/example-ssr",
       "version": "0.0.0",
       "dependencies": {
-        "@react-querybuilder/core": "^8.22.5",
+        "@react-querybuilder/core": "^8.23.0",
         "@solidjs/web": "2.0.0-rc.0",
         "solid-js": "2.0.0-rc.0",
         "solid-querybuilder": "workspace:*",
@@ -61,7 +61,7 @@
       "name": "solid-querybuilder",
       "version": "0.1.0",
       "dependencies": {
-        "@react-querybuilder/core": "^8.22.5",
+        "@react-querybuilder/core": "^8.23.0",
       },
       "devDependencies": {
         "@arethetypeswrong/cli": "^0.18.5",
@@ -292,7 +292,7 @@
 
     "@parcel/watcher-win32-x64": ["@parcel/watcher-win32-x64@2.6.0", "", { "os": "win32", "cpu": "x64" }, "sha512-cA+/pXV2YkfxlIcXOQ5fSWqAzzPyD78/x5qbK/I0vUkrlYHA8TIz+MXjAbGouguKVSI4bOmkTSJ1/poVSsgt+A=="],
 
-    "@react-querybuilder/core": ["@react-querybuilder/core@8.22.5", "", { "dependencies": { "@ts-jison/lexer": "0.4.1-alpha.1", "@ts-jison/parser": "0.4.1-alpha.1", "@types/json-logic-js": ">=2", "immer": "^11.1.15", "numeric-quantity": "^3.2.2" }, "peerDependencies": { "@tanstack/db": ">=0.6.9", "@traqula/parser-sparql-1-2": ">=0.1.0", "chevrotain": ">=11", "drizzle-orm": ">=0.38.0", "json-logic-js": ">=2", "jsonata": ">=2", "sequelize": ">=6", "spel2js": ">=0.2.0" }, "optionalPeers": ["@tanstack/db", "@traqula/parser-sparql-1-2", "chevrotain", "drizzle-orm", "json-logic-js", "jsonata", "sequelize", "spel2js"] }, "sha512-ZagsuGcKigrNPM/jPS3k1Ly/LYIHdW13Np2atz4C4Id24AON09nlQp9yb9ZyxbgAAPk7uaXC1TlRq01Q+2sa1A=="],
+    "@react-querybuilder/core": ["@react-querybuilder/core@8.23.0", "", { "dependencies": { "@ts-jison/lexer": "0.4.1-alpha.1", "@ts-jison/parser": "0.4.1-alpha.1", "@types/json-logic-js": ">=2", "immer": "^11.1.16", "numeric-quantity": "^3.2.2" }, "peerDependencies": { "@tanstack/db": ">=0.6.9", "@traqula/parser-sparql-1-2": ">=0.1.0", "chevrotain": ">=11", "drizzle-orm": ">=0.38.0", "json-logic-js": ">=2", "jsonata": ">=2", "sequelize": ">=6", "spel2js": ">=0.2.0" }, "optionalPeers": ["@tanstack/db", "@traqula/parser-sparql-1-2", "chevrotain", "drizzle-orm", "json-logic-js", "jsonata", "sequelize", "spel2js"] }, "sha512-5EHBNwC31K0E4LJE2vea7s7bHnlRnYShH3ceSF4ZMcW5pnfcByfJA6JHymT1bh67l+n7iYq5n2gXtJuCZMLDSw=="],
 
     "@rolldown/binding-android-arm64": ["@rolldown/binding-android-arm64@1.2.4", "", { "os": "android", "cpu": "arm64" }, "sha512-jHC2cnyKz5xU2fhECtFl8OZ83cYNt13GZQD+0uMJ/X3o+ijmd56okHhTUwxVSHPx1IRVIJEZ1/1pPzeLCU6XKA=="],
 

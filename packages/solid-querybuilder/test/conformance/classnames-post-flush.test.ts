@@ -1,5 +1,5 @@
 /**
- * The class surface *after* effects have flushed, asserted against the `schemaVersion` 2
+ * The class surface *after* effects have flushed, asserted against the `schemaVersion` 3
  * `classnames-post-flush.json` layer.
  *
  * Rendered **uncontrolled** (`defaultQuery`, no `onQueryChange`), exactly as upstream generated

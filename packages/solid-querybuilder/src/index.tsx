@@ -11,4 +11,9 @@ export * from './actions.js';
 export * from './components/index.js';
 export { Label } from './internal/Label.jsx';
 export * from './reactive/index.js';
+// Two stars can't disambiguate themselves: core 8.23 added its own `controlKeys`, which collides
+// with the port's (TS2308). The port's list is the deliberate delta — it omits `dragHandle`,
+// `ruleGroupHeaderElements`, and `ruleGroupBodyElements`, matching this package's `Controls` —
+// so it is re-exported explicitly to win.
+export { controlKeys } from './reactive/context.js';
 export type * from './types/index.js';

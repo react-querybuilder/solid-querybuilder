@@ -33,6 +33,17 @@ export interface ClassNameEntry {
   path?: string;
   /** The verbatim `class` attribute. Whitespace is preserved; this is a byte-level claim. */
   className: string;
+  /**
+   * The concatenation of this element's *own* direct text-node children, verbatim — no trimming,
+   * no collapsing, no descendant text. `''` when there are none (present, not omitted, so the
+   * key set is stable). Added by `schemaVersion` 3.
+   *
+   * Verbatim is the point: it catches a stray space in a label or a whitespace text node emitted
+   * by a template compiler, both invisible under any normalization. Both walkers here go through
+   * a real DOM, so character references are decoded for free — upstream's `decodeText` exists
+   * only because its markup walker is `HTMLRewriter`, which reports raw source text.
+   */
+  text: string;
 }
 
 /** The accessible description (`title`) of one rule group. */
@@ -75,6 +86,12 @@ export const extractFromContainer = (container: Element): ExtractResult => {
         ...(testID === undefined ? {} : { testID }),
         ...(path === undefined ? {} : { path }),
         className,
+        // Direct text-node children only, in document order. `Node.TEXT_NODE` is spelled `3` so
+        // this works against whatever DOM implementation is in play (jsdom in either project).
+        text: [...element.childNodes]
+          .filter(node => node.nodeType === 3)
+          .map(node => node.nodeValue ?? '')
+          .join(''),
       });
     }
 

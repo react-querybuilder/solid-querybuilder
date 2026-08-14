@@ -10,7 +10,7 @@
     "check": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@react-querybuilder/core": "^8.22.5",
+    "@react-querybuilder/core": "^8.23.0",
     "@solidjs/web": "2.0.0-rc.0",
     "solid-js": "2.0.0-rc.0"
   },

@@ -247,7 +247,10 @@ opposite render modes. This is structural, not cosmetic — one plugin instance 
   run otherwise lands on the flush _after_ the first op and silently reverts it. Found the hard
   way: 4 of 19 cases failed with the ops apparently never applied.
 - `extract.ts` exposes both `extractFromContainer` and `extractFromMarkup` (upstream's
-  `schemaVersion` 2 split). The markup form builds its own `JSDOM` when there is no global
+  `schemaVersion` 2 split). Both walk a real DOM here, so `schemaVersion` 3's per-element `text`
+  channel (own direct text-node children only, verbatim) needs no entity decoding — upstream's
+  `decodeText` exists only because its markup walker is `HTMLRewriter`. The markup form builds its
+  own `JSDOM` when there is no global
   `DOMParser`, which is what lets the ssr project run in the `node` environment and thereby prove
   a server render needs no document.
 
@@ -294,8 +297,9 @@ The four conformance gates were each proved red and reverted:
 
 1. **DOM parity** — ` conformance-gate-probe` appended to `ActionElement.tsx`'s class turned
    exactly 100 cases red (50 static + 50 post-flush), which is the split the two projects promise.
-2. **`schemaVersion`** — `EXPECTED_SCHEMA_VERSION = 3` made `conformance:fetch` exit 1 with the
-   "update `test/conformance` before bumping the tag" message.
+2. **`schemaVersion`** — `EXPECTED_SCHEMA_VERSION = 4` made `conformance:fetch` exit 1 with the
+   "update `test/conformance` before bumping the tag" message. (Originally proved with `3` against
+   the schema-2 fixtures; it fired for real on the v8.23.0 bump.)
 3. **Scenario drift** — renaming the local `allControls` scenario turned the drift test (and the
    three case-alignment tests) red while all 50 rendered cases stayed green.
 4. **Value-editor reset** — an early `return` in `createValueEditorReset`'s apply phase left

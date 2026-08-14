@@ -16,6 +16,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- `@react-querybuilder/core` is bumped to **8.23.0**, and the conformance fixtures with it
+  (`CONFORMANCE_TAG` v8.22.4 → v8.23.0, `schemaVersion` 2 → 3). Schema 3 adds a per-element `text`
+  channel — the element's own direct text-node children, verbatim — so `extract.ts` now emits it.
+  Both walkers here go through a real DOM, so entity decoding is free. All 237 conformance
+  assertions stay green; the new channel was proved live (a leading space added to every
+  `ActionElement` label turns 100 cases red, a change the class-only schema-2 surface could not
+  see).
+- `controlKeys` is now re-exported explicitly from the barrel. Core 8.23.0 exports a `controlKeys`
+  of its own, and two star exports cannot disambiguate themselves (TS2308). This package's list is
+  the deliberate delta — it omits `dragHandle`, `ruleGroupHeaderElements`, and
+  `ruleGroupBodyElements`, matching this package's `Controls` — so it wins.
 - **Breaking:** `createQueryBuilderState` is renamed **`createQueryBuilder`** and is now documented
   as the package's headless entry point (see "Headless usage" in the README). It already was one —
   it returns query, tree, manager, schema, actions and context and renders nothing — so this is a

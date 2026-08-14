@@ -68,7 +68,7 @@
     "@solidjs/web": "^2.0.0-rc.0"
   },
   "dependencies": {
-    "@react-querybuilder/core": "^8.22.5"
+    "@react-querybuilder/core": "^8.23.0"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
