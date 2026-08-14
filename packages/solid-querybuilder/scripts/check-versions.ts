@@ -25,8 +25,8 @@ const read = async (pkg: string): Promise<string | undefined> => {
 
 // Exact pins. `solid-js` and `@solidjs/web` must move together, and only deliberately.
 const exact: Record<string, string> = {
-  'solid-js': '2.0.0-beta.32',
-  '@solidjs/web': '2.0.0-beta.32',
+  'solid-js': '2.0.0-rc.0',
+  '@solidjs/web': '2.0.0-rc.0',
   'vite-plugin-solid': '3.0.0-next.23',
   '@solidjs/testing-library': '1.0.0-beta.2',
 };
