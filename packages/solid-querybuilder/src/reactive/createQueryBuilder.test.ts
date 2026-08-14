@@ -477,6 +477,8 @@ describe('createQueryBuilder', () => {
     ['getParameters', () => []],
     ['getInputType', () => 'text'],
     ['getSubQueryBuilderProps', () => ({ fields: [] })],
+    ['validator', () => true],
+    ['idGenerator', () => 'generated-id'],
   ] as [string, () => unknown][])(
     'reconfigures when %s appears or disappears, but not when it is merely replaced',
     (key, fn) => {

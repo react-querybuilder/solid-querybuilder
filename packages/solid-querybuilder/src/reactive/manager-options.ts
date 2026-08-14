@@ -83,6 +83,8 @@ const forwardedFnProps = [
   'getParameters',
   'getInputType',
   'getSubQueryBuilderProps',
+  'validator',
+  'idGenerator',
 ] as const;
 
 type ForwardedFnProp = (typeof forwardedFnProps)[number];
@@ -159,11 +161,11 @@ export const createManagerOptions = <F extends FullField, O extends FullOperator
       disabledPaths: snapshot(disabledPaths()),
       queryDisabled: p.disabled === true,
       history: true,
-      validator: p.validator,
-      idGenerator: p.idGenerator,
       // Forwarded so that changes to these props take effect without a reconfigure. `live` returns
       // `undefined` for a non-function prop, so the two that also accept a plain name fall back
       // to the raw value.
+      validator: live('validator') as never,
+      idGenerator: live('idGenerator') as never,
       getDefaultField: (live('getDefaultField') ?? p.getDefaultField) as never,
       getDefaultOperator: (live('getDefaultOperator') ?? p.getDefaultOperator) as never,
       getDefaultValue: live('getDefaultValue') as never,
