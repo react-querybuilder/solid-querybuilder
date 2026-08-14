@@ -7,7 +7,6 @@ import {
   getParentPath,
   getValidationClassNames,
 } from '@react-querybuilder/core';
-import type { Accessor } from 'solid-js';
 import { createMemo } from 'solid-js';
 import type { RuleGroupProps } from '../types/props.js';
 
@@ -24,7 +23,7 @@ type ActionHandler = (event?: MouseEvent, context?: AnyContext) => void;
  * As with `createRuleState`, React's `useMemo` graph at `RuleGroup.tsx:563-740` is a dependency
  * spec: the class names come from core's `deriveRuleGroup*ClassNames`, the resolved
  * configuration from `deriveRuleGroupContext`, and the child paths from `derivePathInfo`. Data
- * members are getters over memos.
+ * members are getters.
  */
 export interface RuleGroupState {
   /**
@@ -66,19 +65,19 @@ const stopPropagation =
 /**
  * Derives the rendering state for a rule group.
  *
- * Accepts an accessor as well as a plain props object, for the same reason as
- * `createRuleState`: a subquery's group is not in the manager's query.
+ * Takes a plain props object, for the same reason as `createRuleState`: Solid props are already
+ * reactive getters, and a synthesized getter-object literal (which is what `RuleSubQuery` builds
+ * for a subquery's group) is equally reactive.
  */
-export const createRuleGroupState = (
-  props: RuleGroupProps | Accessor<RuleGroupProps>
-): RuleGroupState => {
-  const p: Accessor<RuleGroupProps> = typeof props === 'function' ? props : () => props;
+export const createRuleGroupState = (props: RuleGroupProps): RuleGroupState => {
+  const p = (): RuleGroupProps => props;
 
-  const schema = createMemo(() => p().schema);
-  const path = createMemo(() => p().path);
+  // Plain closures, not memos — see the note in `createRuleState`.
+  const schema = () => p().schema;
+  const path = () => p().path;
 
-  const disabled = createMemo(() => !!p().parentDisabled || !!p().disabled);
-  const muted = createMemo(() => !!p().parentMuted || !!p().ruleGroup.muted);
+  const disabled = () => !!p().parentDisabled || !!p().disabled;
+  const muted = () => !!p().parentMuted || !!p().ruleGroup.muted;
 
   const ctx = createMemo(() =>
     deriveRuleGroupContext(p().ruleGroup, schema().combinators, {

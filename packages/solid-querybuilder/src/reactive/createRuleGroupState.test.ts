@@ -1,5 +1,4 @@
 import type { RuleGroupType, RuleGroupTypeAny, RuleGroupTypeIC } from '@react-querybuilder/core';
-import { createSignal, flush } from 'solid-js';
 import { describe, expect, it } from 'vitest';
 import { setupInRoot } from '../../test/reactive-harness.js';
 import {
@@ -229,25 +228,6 @@ describe('createRuleGroupState', () => {
   });
 
   describe('reactivity', () => {
-    it('accepts an accessor and tracks it', () => {
-      const { actions } = createRecordingActions();
-      const state = setupInRoot(() =>
-        createQueryBuilderState(baseProps({ defaultQuery: flatQuery }))
-      );
-      const [not, setNot] = createSignal(false);
-      const result = setupInRoot(() =>
-        createRuleGroupState(() =>
-          ruleGroupProps(state, { ...flatQuery, not: not() } as RuleGroupType, { actions })
-        )
-      );
-
-      expect(result.ruleGroup.not).toBe(false);
-      setNot(true);
-      // Reads lag writes; without the flush this assertion would see the old value.
-      flush();
-      expect(result.ruleGroup.not).toBe(true);
-    });
-
     it('returns getters, not accessors, so members read without a call', () => {
       const { result } = setup();
       const descriptor = Object.getOwnPropertyDescriptor(result, 'outerClassName');

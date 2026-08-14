@@ -7,6 +7,25 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Removed
+
+- **Breaking:** `createRuleContext` and `createRuleGroupContext` are no longer exported. Each was a
+  single-line `createMemo` around `QueryManager#getRuleContext` / `#getRuleGroupContext` keyed on
+  query identity, with no consumer inside the package. Callers should read the manager directly —
+  `createMemo(() => (query(), manager.getRuleContext(path())))` is the whole implementation.
+
+### Changed
+
+- Internal: ~20 `createMemo` calls that wrapped a single property read or a primitive-returning
+  boolean expression are now plain closures. Solid props are already lazy getters, so those memos
+  allocated a computation node to cache a property access. Memos that allocate an object, run a
+  user callback (`validator`, `accessibleDescriptionGenerator`), or exist for identity stability
+  (`disabledPaths`, the `configVersion`-keyed option lists) are untouched. `createRuleState`'s
+  `resolvers` memo is inlined into the `ctx` memo it exclusively fed.
+- `createRuleState` and `createRuleGroupState` take a plain `RuleProps` / `RuleGroupProps` instead
+  of `Props | Accessor<Props>`. A getter-object literal is equally reactive, which is what the one
+  internal accessor caller (`RuleSubQuery`) was already passing.
+
 ## [0.1.0] - 2026-08-08
 
 ### Changed

@@ -15,6 +15,7 @@ import type {
   QueryManagerOptions,
   RuleGroupTypeAny,
   RuleType,
+  ValidationMap,
   ValueEditorType,
   ValueSourceFullOptions,
 } from '@react-querybuilder/core';
@@ -199,9 +200,11 @@ export const createQueryBuilderState = <
     | QueryManager<RuleGroupTypeAny, F, FullOperator, FullCombinator>
     | undefined;
 
-  const maxLevels = createMemo(() =>
-    (getProps().maxLevels ?? 0) > 0 ? Number(getProps().maxLevels) : Infinity
-  );
+  // A plain closure: it returns a primitive, so there is no identity to stabilize.
+  const maxLevels = (): number =>
+    (getProps().maxLevels ?? 0) > 0 ? Number(getProps().maxLevels) : Infinity;
+  // Memoized, unlike `maxLevels`: it returns an array, and `structuralOptions` compares it by
+  // value. Identity stability is the point here, not the cost of the derivation.
   const disabledPaths = createMemo(() =>
     Array.isArray(getProps().disabled) ? (getProps().disabled as Path[]) : emptyDisabledPaths
   );
@@ -521,20 +524,21 @@ export const createQueryBuilderState = <
   const actions = createRuleActions<F, O>(getProps, manager);
 
   // #region Derived config
-  const independentCombinators = createMemo(() => isRuleGroupTypeIC(query()));
-  const queryDisabled = createMemo(() => getProps().disabled === true);
-  const rootGroupDisabled = createMemo(
-    () => !!query().disabled || disabledPaths().some(p => p.length === 0)
-  );
+  // Plain closures: each returns a primitive over reads that allocate nothing.
+  const independentCombinators = (): boolean => isRuleGroupTypeIC(query());
+  const queryDisabled = (): boolean => getProps().disabled === true;
+  const rootGroupDisabled = (): boolean =>
+    !!query().disabled || disabledPaths().some(p => p.length === 0);
 
   const validationResult = createMemo(() => {
     const { validator } = getProps();
     return typeof validator === 'function' ? validator(query()) : emptyValidationMap;
   });
-  const validationMap = createMemo(() => {
+  // `validationResult` stays memoized — it runs a user callback. This only reshapes its result.
+  const validationMap = (): ValidationMap => {
     const result = validationResult();
     return typeof result === 'boolean' ? emptyValidationMap : result;
-  });
+  };
 
   // A disabled root *group* does not disable the wrapper, so this reads `queryDisabled` rather
   // than `rootGroupDisabled`.
@@ -547,9 +551,8 @@ export const createQueryBuilderState = <
     })
   );
 
-  const inlineCombinatorsAttr = createMemo(() =>
-    independentCombinators() || config().showCombinatorsBetweenRules ? 'enabled' : 'disabled'
-  );
+  const inlineCombinatorsAttr = (): string =>
+    independentCombinators() || config().showCombinatorsBetweenRules ? 'enabled' : 'disabled';
   // #endregion
 
   // A getter object, not a memo returning a fresh object: a Solid context value is read once by

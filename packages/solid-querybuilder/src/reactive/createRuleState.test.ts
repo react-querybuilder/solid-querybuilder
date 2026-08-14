@@ -1,5 +1,4 @@
 import type { RuleType } from '@react-querybuilder/core';
-import { createSignal, flush } from 'solid-js';
 import { describe, expect, it } from 'vitest';
 import { setupInRoot } from '../../test/reactive-harness.js';
 import { baseProps, createRecordingActions, flatQuery, ruleProps } from '../../test/support.js';
@@ -266,24 +265,6 @@ describe('createRuleState', () => {
   });
 
   describe('reactivity', () => {
-    it('accepts an accessor and tracks it', () => {
-      const { calls, actions } = createRecordingActions();
-      const state = setupInRoot(() =>
-        createQueryBuilderState(baseProps({ defaultQuery: flatQuery }))
-      );
-      const [field, setField] = createSignal('firstName');
-      const result = setupInRoot(() =>
-        createRuleState(() => ruleProps(state, { ...rule, field: field() }, { actions }))
-      );
-
-      expect(result.fieldData.name).toBe('firstName');
-      setField('age');
-      // Reads lag writes; without the flush this assertion would see the old value.
-      flush();
-      expect(result.fieldData.name).toBe('age');
-      expect(calls).toHaveLength(0);
-    });
-
     it('returns getters, not accessors, so members read without a call', () => {
       const { result } = setup();
       const descriptor = Object.getOwnPropertyDescriptor(result, 'classNames');

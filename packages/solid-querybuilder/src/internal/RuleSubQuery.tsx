@@ -105,7 +105,9 @@ export const RuleSubQuery = (props: { ruleProps: RuleProps; parts: RuleState }):
     },
   } as unknown as RuleGroupProps;
 
-  const groupState = createRuleGroupState(() => groupProps);
+  // `groupProps` is a getter-object literal with a fixed identity, so passing it directly is
+  // exactly as reactive as wrapping it in an accessor was.
+  const groupState = createRuleGroupState(groupProps);
 
   return (
     <RuleComponents ruleProps={p()} parts={state()} subQuery={{ groupProps, parts: groupState }} />
