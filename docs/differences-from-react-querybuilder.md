@@ -172,7 +172,7 @@ whenever a caller passes `foo={undefined}` explicitly. A _missing_ key still fal
 
 ## 8. Known behavioral notes
 
-- **The Solid 2 peer is a beta.** `solid-js` and `@solidjs/web` are pinned to `^2.0.0-beta.32`.
+- **The Solid 2 peer is a beta.** `solid-js` and `@solidjs/web` are pinned to `^2.0.0-rc.0`.
   Breaking changes in the Solid 2 line before its final release may require a patch here.
 - **There is no SolidStart gate.** The original plan called for a SolidStart 2.0 example as this
   repo's SSR gate. `@solidjs/start@2.0.0` — despite the major version, and despite being the

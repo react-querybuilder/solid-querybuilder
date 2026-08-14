@@ -24,8 +24,8 @@ solid-querybuilder/
     └── ssr/                       # hand-rolled Vite SSR consumer; the SSR gate
 ```
 
-**Target is Solid 2 only.** Peers are `solid-js@^2.0.0-beta.32` **and
-`@solidjs/web@^2.0.0-beta.32`** — in Solid 2 the DOM runtime is its own package. There is no
+**Target is Solid 2 only.** Peers are `solid-js@^2.0.0-rc.0` **and
+`@solidjs/web@^2.0.0-rc.0`** — in Solid 2 the DOM runtime is its own package. There is no
 `^1.9` leg anywhere: in the manifest, in CI, or in the source. A v1-target port, if it ever
 happens, is a separate repo publishing as `@react-querybuilder/solid1`; do not add compatibility
 shims or `solid-js@1` code paths here.

@@ -31,7 +31,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - **Retargeted the port to Solid 2.0 exclusively.** `peerDependencies` is now
-  `solid-js@^2.0.0-beta.32` **and `@solidjs/web@^2.0.0-beta.32`** — in Solid 2 the DOM runtime is
+  `solid-js@^2.0.0-rc.0` **and `@solidjs/web@^2.0.0-rc.0`** — in Solid 2 the DOM runtime is
   its own package. The `^1.9` peer leg and the non-gating `solid-next` CI job are both gone; CI is
   a single gating job on the pinned beta, preceded by a `check:versions` step that asserts the
   resolved prerelease toolchain has not drifted. `jsxImportSource` is now `@solidjs/web`, and the

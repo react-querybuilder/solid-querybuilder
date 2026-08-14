@@ -15,7 +15,7 @@ jobs:
     # Single job. There is no `solid-js@1.9` leg, gating or otherwise: a v1-target port lives in a
     # separate repo (`@react-querybuilder/solid1`), and a non-gating leg nobody acts on is exactly
     # the kind of inert check this project's standing rule exists to prevent.
-    name: build & test (solid-js@2.0.0-beta.32)
+    name: build & test (solid-js@2.0.0-rc.0)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

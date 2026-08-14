@@ -7,8 +7,8 @@ byte-identical DOM output.
 
 ## ⚠️ Requires Solid 2.0
 
-This package targets **Solid 2 only**. Its peer dependencies are `solid-js@^2.0.0-beta.32` **and**
-`@solidjs/web@^2.0.0-beta.32` — in Solid 2 the DOM runtime ships as its own package, so both are
+This package targets **Solid 2 only**. Its peer dependencies are `solid-js@^2.0.0-rc.0` **and**
+`@solidjs/web@^2.0.0-rc.0` — in Solid 2 the DOM runtime ships as its own package, so both are
 required.
 
 Solid 2 is currently in **beta**, and this package tracks it deliberately rather than waiting: the
@@ -23,7 +23,7 @@ will. Should demand warrant a Solid 1.x port, it would be published separately a
 npm install solid-querybuilder
 ```
 
-`solid-js@^2.0.0-beta.32` and `@solidjs/web@^2.0.0-beta.32` are peer dependencies. Install
+`solid-js@^2.0.0-rc.0` and `@solidjs/web@^2.0.0-rc.0` are peer dependencies. Install
 `@solidjs/web` from the `next` dist-tag; its `latest` tag is `2.0.0-experimental.0`, an incompatible
 line. `@react-querybuilder/core` is a regular dependency and is re-exported in full — `formatQuery`,
 `defaultOperators`, `transformQuery`, `QueryManager` and the rest all import from
