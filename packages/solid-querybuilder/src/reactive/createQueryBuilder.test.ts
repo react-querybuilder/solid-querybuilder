@@ -434,6 +434,90 @@ describe('createQueryBuilder', () => {
     expect(state.manager.createRule().field).toBe('lastName');
   });
 
+  it('picks up a function prop supplied after initialization, and its later removal', () => {
+    const [getDefaultValue, setGetDefaultValue] = createSignal<(() => string) | undefined>();
+    const state = setupInRoot(() =>
+      createQueryBuilder(() => ({
+        fields,
+        enableMountQueryChange: false,
+        getDefaultValue: getDefaultValue() as never,
+      }))
+    );
+
+    // Absent at init: the manager applies its own precedence rules.
+    expect(state.manager.createRule().value).toBe('');
+
+    setGetDefaultValue(() => () => 'added');
+    flush();
+    expect(state.manager.createRule().value).toBe('added');
+
+    // Replaced: the live closure keeps up with no reconfigure.
+    const versionAfterAdd = state.manager.getConfigVersion();
+    setGetDefaultValue(() => () => 'replaced');
+    flush();
+    expect(state.manager.createRule().value).toBe('replaced');
+    expect(state.manager.getConfigVersion()).toBe(versionAfterAdd);
+
+    // Removed: the wrapper is uninstalled rather than left calling `undefined`.
+    setGetDefaultValue(undefined);
+    flush();
+    expect(() => state.manager.createRule()).not.toThrow();
+    expect(state.manager.createRule().value).toBe('');
+  });
+
+  it.each([
+    ['getDefaultField', () => 'lastName'],
+    ['getDefaultOperator', () => '='],
+    ['getDefaultValue', () => 'v'],
+    ['getOperators', () => [{ name: '=', value: '=', label: '=' }]],
+    ['getValueEditorType', () => 'text'],
+    ['getValues', () => []],
+    ['getValueSources', () => ['value']],
+    ['getMatchModes', () => []],
+    ['getParameters', () => []],
+    ['getInputType', () => 'text'],
+    ['getSubQueryBuilderProps', () => ({ fields: [] })],
+  ] as [string, () => unknown][])(
+    'reconfigures when %s appears or disappears, but not when it is merely replaced',
+    (key, fn) => {
+      const [present, setPresent] = createSignal(false);
+      // ⚠️ `createSignal` treats a bare function as a lazy initializer; wrap it.
+      const [identity, setIdentity] = createSignal<() => unknown>(() => fn);
+      const state = setupInRoot(() =>
+        createQueryBuilder(
+          () =>
+            ({
+              fields,
+              enableMountQueryChange: false,
+              ...(present() ? { [key]: identity() } : {}),
+            }) as never
+        )
+      );
+
+      // Effects created inside a root are queued: the deferred reconfigure effect must take its
+      // first (dependency-registering) run before the test drives anything.
+      flush();
+      const initial = state.manager.getConfigVersion();
+
+      setPresent(true);
+      flush();
+      const afterAdd = state.manager.getConfigVersion();
+      expect(afterAdd).toBeGreaterThan(initial);
+
+      setIdentity(
+        () =>
+          (...args: unknown[]) =>
+            fn(...(args as []))
+      );
+      flush();
+      expect(state.manager.getConfigVersion()).toBe(afterAdd);
+
+      setPresent(false);
+      flush();
+      expect(state.manager.getConfigVersion()).toBeGreaterThan(afterAdd);
+    }
+  );
+
   it('exposes schema helpers derived from the manager', () => {
     const state = setupInRoot(() =>
       createQueryBuilder({

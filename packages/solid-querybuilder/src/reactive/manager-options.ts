@@ -67,18 +67,35 @@ export interface ManagerOptionsParts<F extends FullField, O extends FullOperator
 }
 
 /**
+ * Every function prop forwarded to the manager through a `live()` closure. Also drives the
+ * presence flags in {@link ManagerOptionsParts.structuralOptions}, so adding or removing any of
+ * them reconfigures the manager rather than leaving a stale (or missing) wrapper installed.
+ */
+const forwardedFnProps = [
+  'getDefaultField',
+  'getDefaultOperator',
+  'getDefaultValue',
+  'getOperators',
+  'getValueEditorType',
+  'getValues',
+  'getValueSources',
+  'getMatchModes',
+  'getParameters',
+  'getInputType',
+  'getSubQueryBuilderProps',
+] as const;
+
+type ForwardedFnProp = (typeof forwardedFnProps)[number];
+
+/**
  * Derives everything the {@link QueryManager} is configured with from props and the merged config.
  *
  * @param getProps - Reads the current props.
  * @param config - The merged `QueryBuilder` config.
- * @param initialProps - The props as read once, untracked, at initialization. Used only to decide
- * which function props were supplied, which fixes the manager's precedence rules for the lifetime
- * of the manager.
  */
 export const createManagerOptions = <F extends FullField, O extends FullOperator>(
   getProps: Accessor<QueryBuilderProps<RuleGroupTypeAny, F, O, FullCombinator>>,
-  config: Accessor<MergedQueryBuilderConfig<F, GetOptionIdentifierType<O>>>,
-  initialProps: QueryBuilderProps<RuleGroupTypeAny, F, O, FullCombinator>
+  config: Accessor<MergedQueryBuilderConfig<F, GetOptionIdentifierType<O>>>
 ): ManagerOptionsParts<F, O> => {
   // A plain closure: it returns a primitive, so there is no identity to stabilize.
   const maxLevels = (): number =>
@@ -91,16 +108,23 @@ export const createManagerOptions = <F extends FullField, O extends FullOperator
 
   /**
    * Forwards a function prop to the manager through a closure, so later changes to the prop take
-   * effect without rebuilding the manager. Returns `undefined` when the prop is absent at
-   * initialization, leaving the manager to apply its own precedence rules instead of treating
-   * the option as configured.
+   * effect without rebuilding the manager. Returns `undefined` when the prop is absent *now*,
+   * leaving the manager to apply its own precedence rules instead of treating the option as
+   * configured.
+   *
+   * Presence is read from current props, not `initialProps`: a callback that is later removed
+   * would otherwise leave a wrapper calling `undefined`, and one later supplied would never
+   * reach the manager. `forwardedFnProps` puts every presence flag in the structural signature,
+   * so add/remove transitions reconfigure and this is re-evaluated. The wrapper still re-checks
+   * at call time, since a swap-to-absent is only visible after that reconfigure lands.
    */
-  const live = <A extends unknown[], R>(
-    pick: (props: QueryBuilderProps<RuleGroupTypeAny, F, O, FullCombinator>) => unknown
-  ): ((...args: A) => R) | undefined =>
-    typeof pick(initialProps) === 'function'
-      ? (...args: A) => (pick(getProps()) as (...args: A) => R)(...args)
-      : undefined;
+  const live = <A extends unknown[], R>(key: ForwardedFnProp): ((...args: A) => R) | undefined => {
+    if (typeof getProps()[key] !== 'function') return undefined;
+    return (...args: A) => {
+      const fn = getProps()[key] as unknown;
+      return typeof fn === 'function' ? (fn as (...args: A) => R)(...args) : (undefined as R);
+    };
+  };
 
   /**
    * Builds the full option set for the manager. Used both for construction and for every
@@ -137,22 +161,20 @@ export const createManagerOptions = <F extends FullField, O extends FullOperator
       history: true,
       validator: p.validator,
       idGenerator: p.idGenerator,
-      // Forwarded so that changes to these props take effect without a reconfigure.
-      getDefaultField: (typeof initialProps.getDefaultField === 'function'
-        ? live(pp => pp.getDefaultField)
-        : p.getDefaultField) as never,
-      getDefaultOperator: (typeof initialProps.getDefaultOperator === 'function'
-        ? live(pp => pp.getDefaultOperator)
-        : p.getDefaultOperator) as never,
-      getDefaultValue: live(pp => pp.getDefaultValue) as never,
-      getOperators: live(pp => pp.getOperators) as never,
-      getValueEditorType: live(pp => pp.getValueEditorType) as never,
-      getValues: live(pp => pp.getValues) as never,
-      getValueSources: live(pp => pp.getValueSources) as never,
-      getMatchModes: live(pp => pp.getMatchModes) as never,
-      getParameters: live(pp => pp.getParameters) as never,
-      getInputType: live(pp => pp.getInputType) as never,
-      getSubQueryBuilderProps: live(pp => pp.getSubQueryBuilderProps) as never,
+      // Forwarded so that changes to these props take effect without a reconfigure. `live` returns
+      // `undefined` for a non-function prop, so the two that also accept a plain name fall back
+      // to the raw value.
+      getDefaultField: (live('getDefaultField') ?? p.getDefaultField) as never,
+      getDefaultOperator: (live('getDefaultOperator') ?? p.getDefaultOperator) as never,
+      getDefaultValue: live('getDefaultValue') as never,
+      getOperators: live('getOperators') as never,
+      getValueEditorType: live('getValueEditorType') as never,
+      getValues: live('getValues') as never,
+      getValueSources: live('getValueSources') as never,
+      getMatchModes: live('getMatchModes') as never,
+      getParameters: live('getParameters') as never,
+      getInputType: live('getInputType') as never,
+      getSubQueryBuilderProps: live('getSubQueryBuilderProps') as never,
     };
   };
 
@@ -184,6 +206,14 @@ export const createManagerOptions = <F extends FullField, O extends FullOperator
       maxLevels: maxLevels(),
       disabledPaths: disabledPaths(),
       queryDisabled: p.disabled === true,
+      // Presence, not identity: a forwarded callback that appears or disappears changes what the
+      // manager must be configured with (wrapper vs. `undefined`, i.e. its own precedence rules),
+      // while a mere identity swap stays invisible to it and is picked up by the live closure. A
+      // non-function value (`getDefaultField`/`getDefaultOperator` also take a plain name) is
+      // forwarded as-is, so it is compared by value here instead.
+      ...Object.fromEntries(
+        forwardedFnProps.map(k => [`fn:${k}`, typeof p[k] === 'function' ? true : p[k]])
+      ),
     };
   };
 

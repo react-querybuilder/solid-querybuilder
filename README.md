@@ -92,6 +92,7 @@ the same props, returns the query, the manager, the schema, the actions and the 
 renders nothing — so you can drive an entirely custom UI from it.
 
 ```tsx
+import { For } from 'solid-js';
 import { createQueryBuilder } from 'solid-querybuilder';
 
 function CustomBuilder(props) {

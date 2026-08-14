@@ -127,7 +127,7 @@ export const createQueryBuilder = <
   const { maxLevels, disabledPaths, buildManagerOptions, structuralOptions } = createManagerOptions<
     F,
     O
-  >(getProps, config, initialProps);
+  >(getProps, config);
 
   const { manager, query, tree, configVersion } = createManagerBridge<F, O>({
     getProps,
