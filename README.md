@@ -85,6 +85,39 @@ function App() {
 }
 ```
 
+## Headless usage
+
+`createQueryBuilder` is the primitive `<QueryBuilder />` is built on, and it is public API. It takes
+the same props, returns the query, the manager, the schema, the actions and the context value, and
+renders nothing — so you can drive an entirely custom UI from it.
+
+```tsx
+import { createQueryBuilder } from 'solid-querybuilder';
+
+function CustomBuilder(props) {
+  const state = createQueryBuilder(props);
+
+  return (
+    <ul>
+      <For each={state.rootGroup.rules}>
+        {(r, i) => (
+          <li>
+            {r.field} {r.operator} {String(r.value)}
+            <button onClick={() => state.actions.onRuleRemove([i()])}>×</button>
+          </li>
+        )}
+      </For>
+      <button onClick={() => state.actions.onRuleAdd(state.schema.createRule(), [])}>+ rule</button>
+    </ul>
+  );
+}
+```
+
+Read the query from `state.rootGroup` (the store mirror, reconciled by `id`, so `<For>` sees stable
+identities) rather than `state.query` (a plain identity signal) whenever you are rendering it.
+`state.manager` is the underlying [`QueryManager`](https://react-querybuilder.js.org); everything
+else is derived from it.
+
 ## Styling
 
 Two prebuilt stylesheets ship in `dist`: `query-builder.css` (full) and

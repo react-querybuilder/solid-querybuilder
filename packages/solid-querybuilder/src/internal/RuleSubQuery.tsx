@@ -3,7 +3,7 @@ import { isRuleGroup, prepareOptionList, rootPath } from '@react-querybuilder/co
 import type { JSX } from '@solidjs/web';
 import { createMemo, merge, untrack } from 'solid-js';
 import { defaultControlElements } from '../components/defaultControlElements.js';
-import { createQueryBuilderState } from '../reactive/createQueryBuilderState.js';
+import { createQueryBuilder } from '../reactive/createQueryBuilder.js';
 import { createRuleGroupState } from '../reactive/createRuleGroupState.js';
 import type { RuleState } from '../reactive/createRuleState.js';
 import type { QueryBuilderProps, RuleGroupProps, RuleProps } from '../types/props.js';
@@ -16,7 +16,7 @@ const defaultSubproperties: FullField[] = [{ name: '', value: '', label: '' }];
  * builder for the rule's value.
  *
  * Port of React Query Builder's `RuleComponentsWithSubQuery`. It exists as its own component for
- * the same reason React's does: the subquery needs its own `createQueryBuilderState`, which runs
+ * the same reason React's does: the subquery needs its own `createQueryBuilder`, which runs
  * during component setup and therefore cannot live behind a `<Show>` inside `Rule`.
  *
  * It provides no new context, matching React and both prior ports — a replacement control
@@ -71,7 +71,7 @@ export const RuleSubQuery = (props: { ruleProps: RuleProps; parts: RuleState }):
     },
   }) as unknown as QueryBuilderProps<RuleGroupTypeAny>;
 
-  const subState = createQueryBuilderState(() => subProps as never, {
+  const subState = createQueryBuilder(() => subProps as never, {
     defaultControls: defaultControlElements as never,
   });
 

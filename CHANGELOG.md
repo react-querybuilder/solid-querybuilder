@@ -16,6 +16,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Breaking:** `createQueryBuilderState` is renamed **`createQueryBuilder`** and is now documented
+  as the package's headless entry point (see "Headless usage" in the README). It already was one —
+  it returns query, tree, manager, schema, actions and context and renders nothing — so this is a
+  naming change only. `CreateQueryBuilderStateOptions` is renamed `CreateQueryBuilderOptions`; the
+  returned `QueryBuilderState` interface keeps its name. No alias is kept.
+- **Breaking (source path only):** `createRuleActions` moved from `src/reactive/` to `src/actions.ts`.
+  It is the one module in the reactive layer with no reactive primitives — a pure `QueryManager` →
+  `QueryActions` adapter. The public barrel export is unchanged.
+- Internal: `createQueryBuilder.ts` (767 lines) is split along its existing `#region` seams into
+  `manager-options.ts` (the option builders and `valuesEqual`), `manager-bridge.ts` (manager
+  construction, query seeding, the version signals, the store projection, the subscription and the
+  three effects), `schema.ts` (the option lists, the resolvers and the `Schema` getter object) and
+  `context-value.ts`. Pure moves; the assembly file is ~200 lines and the new modules are internal.
 - Internal: ~20 `createMemo` calls that wrapped a single property read or a primitive-returning
   boolean expression are now plain closures. Solid props are already lazy getters, so those memos
   allocated a computation node to cache a property access. Memos that allocate an object, run a

@@ -5,7 +5,7 @@ import type {
   RuleType,
 } from '@react-querybuilder/core';
 import { defaultTranslations } from '@react-querybuilder/core';
-import type { QueryBuilderState } from '../src/reactive/createQueryBuilderState.js';
+import type { QueryBuilderState } from '../src/reactive/createQueryBuilder.js';
 import type { QueryBuilderProps, RuleGroupProps, RuleProps } from '../src/types/index.js';
 
 /**
