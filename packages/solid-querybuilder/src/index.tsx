@@ -7,6 +7,7 @@
 // This is a star export, so it loses every name the port declares explicitly below; that is the
 // intended precedence (the port's `Schema`, `RuleProps`, etc. are deliberate deltas).
 export * from '@react-querybuilder/core';
+export * from './actions.js';
 export * from './components/index.js';
 export { Label } from './internal/Label.jsx';
 export * from './reactive/index.js';

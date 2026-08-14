@@ -5,7 +5,7 @@
  * This exercises core rather than the port. It is here anyway because it pins the core version
  * the port is built against to the behavior the fixtures describe: a silent behavior change in a
  * patch release fails here rather than in a consumer's app. The port-side half — that
- * `createQueryBuilderState` maps props onto the manager's guard options correctly — is in
+ * `createQueryBuilder` maps props onto the manager's guard options correctly — is in
  * `actions.solid.test.ts`.
  */
 

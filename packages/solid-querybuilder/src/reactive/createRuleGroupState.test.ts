@@ -7,7 +7,7 @@ import {
   flatQuery,
   ruleGroupProps,
 } from '../../test/support.js';
-import { createQueryBuilderState } from './createQueryBuilderState.js';
+import { createQueryBuilder } from './createQueryBuilder.js';
 import { createRuleGroupState } from './createRuleGroupState.js';
 
 const clickEvent = (altKey: boolean) =>
@@ -19,7 +19,7 @@ const setup = (
 ) => {
   const { calls, actions } = createRecordingActions();
   const state = setupInRoot(() =>
-    createQueryBuilderState(baseProps({ defaultQuery: flatQuery, ...qbOverrides }))
+    createQueryBuilder(baseProps({ defaultQuery: flatQuery, ...qbOverrides }))
   );
   const group = (overrides.ruleGroup ?? state.query) as RuleGroupTypeAny;
   const props = ruleGroupProps(state, group, { actions, ...overrides });

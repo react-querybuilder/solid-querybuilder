@@ -3,7 +3,7 @@
  * `utils/testing/queryFixtures.ts` upstream.
  *
  * Shared by `actions.test.ts` (which replays through a bare manager) and
- * `actions.solid.test.ts` (which replays through the manager `createQueryBuilderState` builds).
+ * `actions.solid.test.ts` (which replays through the manager `createQueryBuilder` builds).
  */
 
 import type {

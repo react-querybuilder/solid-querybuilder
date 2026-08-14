@@ -185,7 +185,7 @@ setX(v)` returns the setter's return value and throws "invalid cleanup value". U
 - `createProjection(fn, seed, options?)` is a derived, **read-only** store with the same `'id'`
   default key. It can be driven from a non-reactive external source (the manager's subscribe
   callback) by bumping a version signal from that callback and reading the signal in `fn`; this is
-  what `createQueryBuilderState` uses.
+  what `createQueryBuilder` uses.
 - `createStore`'s setter takes a **draft callback** (`setStore(draft => { draft.x = … })`). There is
   no 1.x `setStore('key', value)` path-argument form; it throws `fn is not a function`.
 

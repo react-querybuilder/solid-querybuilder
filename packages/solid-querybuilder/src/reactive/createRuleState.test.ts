@@ -2,7 +2,7 @@ import type { RuleType } from '@react-querybuilder/core';
 import { describe, expect, it } from 'vitest';
 import { setupInRoot } from '../../test/reactive-harness.js';
 import { baseProps, createRecordingActions, flatQuery, ruleProps } from '../../test/support.js';
-import { createQueryBuilderState } from './createQueryBuilderState.js';
+import { createQueryBuilder } from './createQueryBuilder.js';
 import { createRuleState } from './createRuleState.js';
 
 const clickEvent = (altKey: boolean) =>
@@ -16,7 +16,7 @@ const setup = (
 ) => {
   const { calls, actions } = createRecordingActions();
   const state = setupInRoot(() =>
-    createQueryBuilderState(baseProps({ defaultQuery: flatQuery, ...qbOverrides }))
+    createQueryBuilder(baseProps({ defaultQuery: flatQuery, ...qbOverrides }))
   );
   const props = ruleProps(state, rule, { actions, ...overrides });
   const result = setupInRoot(() => createRuleState(props));

@@ -3,7 +3,7 @@ import { QueryManager, defaultCombinators } from '@react-querybuilder/core';
 import { createSignal, createStore, flush, snapshot } from 'solid-js';
 import { describe, expect, it, vi } from 'vitest';
 import { setupInRoot } from '../../test/reactive-harness.js';
-import { createQueryBuilderState } from './createQueryBuilderState.js';
+import { createQueryBuilder } from './createQueryBuilder.js';
 
 const fields = [
   { name: 'firstName', label: 'First Name' },
@@ -15,23 +15,23 @@ const simpleQuery: RuleGroupType = {
   rules: [{ id: 'r1', field: 'firstName', operator: '=', value: 'Steve' }],
 };
 
-describe('createQueryBuilderState', () => {
+describe('createQueryBuilder', () => {
   it('seeds the manager from defaultQuery without making it undoable', () => {
-    const state = setupInRoot(() => createQueryBuilderState({ fields, defaultQuery: simpleQuery }));
+    const state = setupInRoot(() => createQueryBuilder({ fields, defaultQuery: simpleQuery }));
 
     expect(state.query.rules).toHaveLength(1);
     expect(state.manager.canUndo()).toBe(false);
   });
 
   it('falls back to an empty group when neither query nor defaultQuery is given', () => {
-    const state = setupInRoot(() => createQueryBuilderState({ fields }));
+    const state = setupInRoot(() => createQueryBuilder({ fields }));
 
     expect(state.query.rules).toHaveLength(0);
     expect(state.independentCombinators).toBe(false);
   });
 
   it('exposes option lists from the manager', () => {
-    const state = setupInRoot(() => createQueryBuilderState({ fields }));
+    const state = setupInRoot(() => createQueryBuilder({ fields }));
 
     expect(state.schema.fields.map(f => (f as { name: string }).name)).toEqual([
       'firstName',
@@ -45,7 +45,7 @@ describe('createQueryBuilderState', () => {
 
   it('mirrors the query in a store keyed by id, preserving identity across a commit', () => {
     const state = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: {
           combinator: 'and',
@@ -69,7 +69,7 @@ describe('createQueryBuilderState', () => {
   it('fires onQueryChange exactly once per commit, before any reader observes it', () => {
     const onQueryChange = vi.fn();
     const state = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: simpleQuery,
         enableMountQueryChange: false,
@@ -92,7 +92,7 @@ describe('createQueryBuilderState', () => {
   it('fires onQueryChange once for a whole manager batch', () => {
     const onQueryChange = vi.fn();
     const state = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: simpleQuery,
         enableMountQueryChange: false,
@@ -112,16 +112,14 @@ describe('createQueryBuilderState', () => {
 
   it('fires onQueryChange on mount when enabled, and not when disabled', () => {
     const onQueryChange = vi.fn();
-    setupInRoot(() =>
-      createQueryBuilderState({ fields, defaultQuery: simpleQuery, onQueryChange })
-    );
+    setupInRoot(() => createQueryBuilder({ fields, defaultQuery: simpleQuery, onQueryChange }));
     expect(onQueryChange).not.toHaveBeenCalled();
     flush();
     expect(onQueryChange).toHaveBeenCalledTimes(1);
 
     const off = vi.fn();
     setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: simpleQuery,
         enableMountQueryChange: false,
@@ -135,7 +133,7 @@ describe('createQueryBuilderState', () => {
   it('pushes a new query prop into the manager (controlled mode)', () => {
     const [query, setQuery] = createSignal<RuleGroupType>(simpleQuery);
     const state = setupInRoot(() =>
-      createQueryBuilderState(() => ({ fields, query: query(), enableMountQueryChange: false }))
+      createQueryBuilder(() => ({ fields, query: query(), enableMountQueryChange: false }))
     );
 
     setQuery({
@@ -152,7 +150,7 @@ describe('createQueryBuilderState', () => {
     const onQueryChange = vi.fn();
     const [query, setQuery] = createSignal<RuleGroupType>(simpleQuery);
     const state = setupInRoot(() =>
-      createQueryBuilderState(() => ({
+      createQueryBuilder(() => ({
         fields,
         query: query(),
         enableMountQueryChange: false,
@@ -183,7 +181,7 @@ describe('createQueryBuilderState', () => {
     });
 
     const state = setupInRoot(() =>
-      createQueryBuilderState(() => ({ fields, query: store.query, enableMountQueryChange: false }))
+      createQueryBuilder(() => ({ fields, query: store.query, enableMountQueryChange: false }))
     );
 
     expect(state.manager.getQuery().combinator).toBe('and');
@@ -208,7 +206,7 @@ describe('createQueryBuilderState', () => {
       },
     });
     const state = setupInRoot(() =>
-      createQueryBuilderState({ fields, defaultQuery: store.query, enableMountQueryChange: false })
+      createQueryBuilder({ fields, defaultQuery: store.query, enableMountQueryChange: false })
     );
     expect(state.manager.getQuery().combinator).toBe('or');
   });
@@ -217,7 +215,7 @@ describe('createQueryBuilderState', () => {
     const manager = new QueryManager<RuleGroupType>(simpleQuery, { fields });
     const [flds, setFlds] = createSignal(fields);
     const state = setupInRoot(() =>
-      createQueryBuilderState(() => ({ manager, fields: flds(), enableMountQueryChange: false }))
+      createQueryBuilder(() => ({ manager, fields: flds(), enableMountQueryChange: false }))
     );
 
     expect(state.manager).toBe(manager);
@@ -235,7 +233,7 @@ describe('createQueryBuilderState', () => {
   it('reconfigures in place when a structural prop changes, keeping query and history', () => {
     const [flds, setFlds] = createSignal(fields);
     const state = setupInRoot(() =>
-      createQueryBuilderState(() => ({
+      createQueryBuilder(() => ({
         fields: flds(),
         defaultQuery: simpleQuery,
         enableMountQueryChange: false,
@@ -262,7 +260,7 @@ describe('createQueryBuilderState', () => {
   it('does not reconfigure when a rebuilt props object is structurally identical', () => {
     const [tick, setTick] = createSignal(0);
     const state = setupInRoot(() =>
-      createQueryBuilderState(() => {
+      createQueryBuilder(() => {
         tick();
         // A fresh object identity on every read, exactly as a consumer with inline literals —
         // or the conformance harness — produces. The deep compare is what stops this from
@@ -288,7 +286,7 @@ describe('createQueryBuilderState', () => {
   });
 
   it('does not reconfigure on mount', () => {
-    const state = setupInRoot(() => createQueryBuilderState({ fields, defaultQuery: simpleQuery }));
+    const state = setupInRoot(() => createQueryBuilder({ fields, defaultQuery: simpleQuery }));
     const versionAtInit = state.manager.getConfigVersion();
     flush();
     expect(state.manager.getConfigVersion()).toBe(versionAtInit);
@@ -297,7 +295,7 @@ describe('createQueryBuilderState', () => {
   it('refreshes option lists after a reconfigure without committing a query change', () => {
     const onQueryChange = vi.fn();
     const state = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: simpleQuery,
         enableMountQueryChange: false,
@@ -314,7 +312,7 @@ describe('createQueryBuilderState', () => {
 
   it('derives the wrapper class name from queryDisabled, not the root group', () => {
     const disabledRoot = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: { ...simpleQuery, disabled: true },
         enableMountQueryChange: false,
@@ -325,7 +323,7 @@ describe('createQueryBuilderState', () => {
     expect(disabledRoot.wrapperClassName).not.toContain('queryBuilder-disabled');
 
     const disabledAll = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: simpleQuery,
         disabled: true,
@@ -338,7 +336,7 @@ describe('createQueryBuilderState', () => {
 
   it('reports disabled paths and the inline-combinators attribute', () => {
     const state = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: simpleQuery,
         disabled: [[]],
@@ -352,7 +350,7 @@ describe('createQueryBuilderState', () => {
     expect(state.dndEnabledAttr).toBe('disabled');
 
     const between = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: simpleQuery,
         showCombinatorsBetweenRules: true,
@@ -364,11 +362,7 @@ describe('createQueryBuilderState', () => {
 
   it('detects independent combinators', () => {
     const state = setupInRoot(() =>
-      createQueryBuilderState({
-        fields,
-        defaultQuery: { rules: [] },
-        enableMountQueryChange: false,
-      })
+      createQueryBuilder({ fields, defaultQuery: { rules: [] }, enableMountQueryChange: false })
     );
     expect(state.independentCombinators).toBe(true);
     expect(state.inlineCombinatorsAttr).toBe('enabled');
@@ -376,7 +370,7 @@ describe('createQueryBuilderState', () => {
 
   it('routes a validation map through validationMap', () => {
     const state = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: simpleQuery,
         enableMountQueryChange: false,
@@ -391,7 +385,7 @@ describe('createQueryBuilderState', () => {
 
   it('marks the wrapper invalid for a boolean validator result', () => {
     const state = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: simpleQuery,
         enableMountQueryChange: false,
@@ -405,14 +399,14 @@ describe('createQueryBuilderState', () => {
   });
 
   it('uses an empty validation map when there is no validator', () => {
-    const state = setupInRoot(() => createQueryBuilderState({ fields, defaultQuery: simpleQuery }));
+    const state = setupInRoot(() => createQueryBuilder({ fields, defaultQuery: simpleQuery }));
     expect(state.schema.validationMap).toEqual({});
   });
 
   it('forwards function props live, without a reconfigure', () => {
     const [suffix, setSuffix] = createSignal('!');
     const state = setupInRoot(() =>
-      createQueryBuilderState(() => ({
+      createQueryBuilder(() => ({
         fields,
         enableMountQueryChange: false,
         getDefaultValue: () => `default${suffix()}`,
@@ -431,7 +425,7 @@ describe('createQueryBuilderState', () => {
 
   it('routes getDefaultField through the live-closure path', () => {
     const state = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         enableMountQueryChange: false,
         getDefaultField: () => 'lastName',
@@ -440,9 +434,95 @@ describe('createQueryBuilderState', () => {
     expect(state.manager.createRule().field).toBe('lastName');
   });
 
+  it('picks up a function prop supplied after initialization, and its later removal', () => {
+    const [getDefaultValue, setGetDefaultValue] = createSignal<(() => string) | undefined>();
+    const state = setupInRoot(() =>
+      createQueryBuilder(() => ({
+        fields,
+        enableMountQueryChange: false,
+        getDefaultValue: getDefaultValue() as never,
+      }))
+    );
+
+    // Absent at init: the manager applies its own precedence rules.
+    expect(state.manager.createRule().value).toBe('');
+
+    setGetDefaultValue(() => () => 'added');
+    flush();
+    expect(state.manager.createRule().value).toBe('added');
+
+    // Replaced: the live closure keeps up with no reconfigure.
+    const versionAfterAdd = state.manager.getConfigVersion();
+    setGetDefaultValue(() => () => 'replaced');
+    flush();
+    expect(state.manager.createRule().value).toBe('replaced');
+    expect(state.manager.getConfigVersion()).toBe(versionAfterAdd);
+
+    // Removed: the wrapper is uninstalled rather than left calling `undefined`.
+    setGetDefaultValue(undefined);
+    flush();
+    expect(() => state.manager.createRule()).not.toThrow();
+    expect(state.manager.createRule().value).toBe('');
+  });
+
+  it.each([
+    ['getDefaultField', () => 'lastName'],
+    ['getDefaultOperator', () => '='],
+    ['getDefaultValue', () => 'v'],
+    ['getOperators', () => [{ name: '=', value: '=', label: '=' }]],
+    ['getValueEditorType', () => 'text'],
+    ['getValues', () => []],
+    ['getValueSources', () => ['value']],
+    ['getMatchModes', () => []],
+    ['getParameters', () => []],
+    ['getInputType', () => 'text'],
+    ['getSubQueryBuilderProps', () => ({ fields: [] })],
+    ['validator', () => true],
+    ['idGenerator', () => 'generated-id'],
+  ] as [string, () => unknown][])(
+    'reconfigures when %s appears or disappears, but not when it is merely replaced',
+    (key, fn) => {
+      const [present, setPresent] = createSignal(false);
+      // ⚠️ `createSignal` treats a bare function as a lazy initializer; wrap it.
+      const [identity, setIdentity] = createSignal<() => unknown>(() => fn);
+      const state = setupInRoot(() =>
+        createQueryBuilder(
+          () =>
+            ({
+              fields,
+              enableMountQueryChange: false,
+              ...(present() ? { [key]: identity() } : {}),
+            }) as never
+        )
+      );
+
+      // Effects created inside a root are queued: the deferred reconfigure effect must take its
+      // first (dependency-registering) run before the test drives anything.
+      flush();
+      const initial = state.manager.getConfigVersion();
+
+      setPresent(true);
+      flush();
+      const afterAdd = state.manager.getConfigVersion();
+      expect(afterAdd).toBeGreaterThan(initial);
+
+      setIdentity(
+        () =>
+          (...args: unknown[]) =>
+            fn(...(args as []))
+      );
+      flush();
+      expect(state.manager.getConfigVersion()).toBe(afterAdd);
+
+      setPresent(false);
+      flush();
+      expect(state.manager.getConfigVersion()).toBeGreaterThan(afterAdd);
+    }
+  );
+
   it('exposes schema helpers derived from the manager', () => {
     const state = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         enableMountQueryChange: false,
         getValueEditorSeparator: () => ' - ',
@@ -495,9 +575,7 @@ describe('createQueryBuilderState', () => {
   });
 
   it('falls back to defaults for absent schema function props', () => {
-    const state = setupInRoot(() =>
-      createQueryBuilderState({ fields, enableMountQueryChange: false })
-    );
+    const state = setupInRoot(() => createQueryBuilder({ fields, enableMountQueryChange: false }));
     const { schema } = state;
     expect(
       schema.getValueEditorSeparator('firstName', '=', { fieldData: schema.fieldMap.firstName! })
@@ -518,12 +596,12 @@ describe('createQueryBuilderState', () => {
 
   it('honors maxLevels only when positive', () => {
     const capped = setupInRoot(() =>
-      createQueryBuilderState({ fields, maxLevels: 2, enableMountQueryChange: false })
+      createQueryBuilder({ fields, maxLevels: 2, enableMountQueryChange: false })
     );
     expect(capped.schema.maxLevels).toBe(2);
 
     const ignored = setupInRoot(() =>
-      createQueryBuilderState({ fields, maxLevels: 0, enableMountQueryChange: false })
+      createQueryBuilder({ fields, maxLevels: 0, enableMountQueryChange: false })
     );
     expect(ignored.schema.maxLevels).toBe(Infinity);
   });
@@ -531,7 +609,7 @@ describe('createQueryBuilderState', () => {
   it('exposes a context value that tracks configuration changes', () => {
     const [notToggle, setNotToggle] = createSignal(false);
     const state = setupInRoot(() =>
-      createQueryBuilderState(() => ({
+      createQueryBuilder(() => ({
         fields,
         showNotToggle: notToggle(),
         enableMountQueryChange: false,
@@ -555,7 +633,7 @@ describe('createQueryBuilderState', () => {
     // These reach the manager as options rather than being reimplemented here; the value editor
     // reset effect handles only the editor-shape half.
     const state = setupInRoot(() =>
-      createQueryBuilderState({
+      createQueryBuilder({
         fields,
         defaultQuery: simpleQuery,
         enableMountQueryChange: false,
@@ -575,7 +653,7 @@ describe('createQueryBuilderState', () => {
 
   it('exposes every schema and context member as a live getter', () => {
     const state = setupInRoot(() =>
-      createQueryBuilderState({ fields, defaultQuery: simpleQuery, enableMountQueryChange: false })
+      createQueryBuilder({ fields, defaultQuery: simpleQuery, enableMountQueryChange: false })
     );
 
     // Reading through `Object.keys` exercises every getter: a member accidentally written as a
@@ -598,7 +676,7 @@ describe('createQueryBuilderState', () => {
 
   it('accepts a non-function getDefaultOperator', () => {
     const state = setupInRoot(() =>
-      createQueryBuilderState({ fields, enableMountQueryChange: false, getDefaultOperator: '>' })
+      createQueryBuilder({ fields, enableMountQueryChange: false, getDefaultOperator: '>' })
     );
     expect(state.manager.createRule().operator).toBe('>');
   });
@@ -606,7 +684,7 @@ describe('createQueryBuilderState', () => {
   it('ignores a query prop that is structurally unchanged', () => {
     const [query, setQuery] = createSignal<RuleGroupType>(simpleQuery);
     const state = setupInRoot(() =>
-      createQueryBuilderState(() => ({ fields, query: query(), enableMountQueryChange: false }))
+      createQueryBuilder(() => ({ fields, query: query(), enableMountQueryChange: false }))
     );
 
     const before = state.manager.getQuery();
@@ -623,11 +701,7 @@ describe('createQueryBuilderState', () => {
     // identical, both arrays, nor same-prototype objects.
     const [baseField, setBaseField] = createSignal<Record<string, unknown> | undefined>(undefined);
     const state = setupInRoot(() =>
-      createQueryBuilderState(() => ({
-        fields,
-        baseField: baseField(),
-        enableMountQueryChange: false,
-      }))
+      createQueryBuilder(() => ({ fields, baseField: baseField(), enableMountQueryChange: false }))
     );
 
     const versionBefore = state.manager.getConfigVersion();
@@ -638,7 +712,7 @@ describe('createQueryBuilderState', () => {
   });
 
   it('is snapshot-able for the manager hand-off', () => {
-    const state = setupInRoot(() => createQueryBuilderState({ fields, defaultQuery: simpleQuery }));
+    const state = setupInRoot(() => createQueryBuilder({ fields, defaultQuery: simpleQuery }));
     expect(snapshot(state.manager)).toBe(state.manager);
   });
 });

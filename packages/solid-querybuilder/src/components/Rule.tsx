@@ -11,7 +11,7 @@ import type { RuleProps } from '../types/props.js';
  *
  * Port of React Query Builder's `Rule`, and, like it, a small wrapper: the controls themselves
  * live in `RuleComponents`, and a rule whose field supports match modes renders `RuleSubQuery`
- * instead — which needs its own `createQueryBuilderState`, and therefore its own component.
+ * instead — which needs its own `createQueryBuilder`, and therefore its own component.
  *
  * Element order and conditional rendering are the contract: read React's `Rule.tsx` as the spec.
  */

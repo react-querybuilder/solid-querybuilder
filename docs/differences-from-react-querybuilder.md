@@ -144,8 +144,9 @@ signature — so no component needs a `widenedProps` re-widening cast.
 
 React Query Builder's hooks (`useQueryBuilder`, `useRule`, `useRuleGroup`, `useValueEditor`, …) are
 not ported under those names. The Solid equivalents live in the `reactive/` layer and are exported:
-`createQueryBuilderState`, `createRuleState`, `createRuleGroupState`, `createRuleActions`,
-`createValueEditorReset`, and the `QueryBuilderContext` / `useQueryBuilderConfig` pair. The `create*`
+`createQueryBuilder`, `createRuleState`, `createRuleGroupState`, `createValueEditorReset`, and the
+`QueryBuilderContext` / `useQueryBuilderConfig` pair (`createRuleActions` is exported too, from
+`src/actions.ts` — it uses no reactive primitives). The `create*`
 naming disambiguates from core's own `createRule` / `createRuleGroup` / `createQueryActions`, which
 this package re-exports.
 

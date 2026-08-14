@@ -2,9 +2,9 @@ import type { RuleGroupType, RuleType } from '@react-querybuilder/core';
 import { QueryManager } from '@react-querybuilder/core';
 import { createStore } from 'solid-js';
 import { describe, expect, it, vi } from 'vitest';
-import { flatQuery, testFields } from '../../test/support.js';
-import type { QueryBuilderProps } from '../types/props.js';
-import { createRuleActions } from './createRuleActions.js';
+import { flatQuery, testFields } from '../test/support.js';
+import { createRuleActions } from './actions.js';
+import type { QueryBuilderProps } from './types/props.js';
 
 const nested: RuleGroupType = {
   id: 'root',

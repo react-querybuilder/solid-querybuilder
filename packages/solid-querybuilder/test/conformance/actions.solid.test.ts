@@ -1,6 +1,6 @@
 /**
  * The port-side half of the action conformance suite: the guard-sensitive sequences replayed
- * through the manager `createQueryBuilderState` builds from `QueryBuilderProps`, rather than
+ * through the manager `createQueryBuilder` builds from `QueryBuilderProps`, rather than
  * through a manager configured directly.
  *
  * This is what catches an option-mapping bug — a `disabled` array that never reaches
@@ -10,13 +10,13 @@
  * - Only the resulting query is asserted. `QueryBuilderProps` has no `onInvalidTarget`, so abort
  *   reasons are not observable here; a guard that fails to apply shows up anyway as a query that
  *   changed when it should not have.
- * - `id`s are stripped before comparing. `createQueryBuilderState` seeds its manager through
+ * - `id`s are stripped before comparing. `createQueryBuilder` seeds its manager through
  *   `resolveCandidateQuery`, which draws from the injected generator, so generated `id`s are
  *   offset by the seeding draws by a constant. That offset is an artifact of construction, not of
  *   mutation.
  *
  * The state is built inside `createRoot(dispose => …)` — Solid's equivalent of Svelte's
- * `$effect.root` and Vue's `effectScope`. `createQueryBuilderState` registers an `onCleanup` for
+ * `$effect.root` and Vue's `effectScope`. `createQueryBuilder` registers an `onCleanup` for
  * its manager subscription and reads a context, both of which need an owner on the stack; a root
  * supplies one outside a component.
  *
@@ -29,7 +29,7 @@ import type { RuleGroupType, RuleGroupTypeAny } from '@react-querybuilder/core';
 import { formatQuery } from '@react-querybuilder/core';
 import { createRoot, flush } from 'solid-js';
 import { describe, expect, it } from 'vitest';
-import { createQueryBuilderState } from '../../src/reactive/index.js';
+import { createQueryBuilder } from '../../src/reactive/index.js';
 import type { QueryBuilderProps } from '../../src/types/index.js';
 import { loadFixture } from './cases.js';
 import { createIdGenerator, queries, type QueryFixtureName } from './queries.js';
@@ -56,7 +56,7 @@ const propsFor = (options: RunOptions): Partial<QueryBuilderProps> => ({
   ...(options.maxLevels === undefined ? {} : { maxLevels: options.maxLevels }),
 });
 
-describe('conformance: actions through createQueryBuilderState', () => {
+describe('conformance: actions through createQueryBuilder', () => {
   it('has guard-sensitive cases to replay', () => {
     expect(eligible.length).toBeGreaterThan(5);
   });
@@ -64,7 +64,7 @@ describe('conformance: actions through createQueryBuilderState', () => {
   for (const { name, fixture: fixtureName, ops, options, expected } of eligible) {
     it(name, () => {
       const root = createRoot(dispose => {
-        const state = createQueryBuilderState({
+        const state = createQueryBuilder({
           ...propsFor(options),
           query: structuredClone(queries[fixtureName as QueryFixtureName]),
           idGenerator: createIdGenerator(),
