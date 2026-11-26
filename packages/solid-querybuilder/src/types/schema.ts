@@ -72,6 +72,7 @@ export interface Schema<F extends FullField, O extends string> {
   showShiftActions: boolean;
   showUndoRedo: boolean;
   showCloneButtons: boolean;
+  showUngroupButtons: boolean;
   showLockButtons: boolean;
   showMuteButtons: boolean;
   autoSelectField: boolean;

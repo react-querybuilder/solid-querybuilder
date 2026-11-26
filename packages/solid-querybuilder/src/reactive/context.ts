@@ -110,6 +110,7 @@ export const controlKeys = [
   'ruleGroup',
   'shiftActions',
   'undoRedoActions',
+  'ungroupAction',
   'valueEditor',
   'valueSelector',
   'valueSourceSelector',

@@ -691,6 +691,23 @@ export type QueryBuilderProps<
         context?: any
       ): RG | boolean;
       /**
+       * This callback is invoked before a group is replaced by its own rules in the parent group.
+       * The function should return `true` to allow the ungrouping to proceed as normal, `false` to
+       * cancel it, or a new query object (presumably based on `query` or `nextQuery`) which will
+       * become the new query state.
+       */
+      onUngroup?(
+        /** The group being ungrouped. */
+        ruleGroup: RG,
+        /** The path of the group being ungrouped. */
+        path: Path,
+        /** The current query, before the ungroup. */
+        query: RG,
+        /** The next query, if the ungroup is allowed to proceed. */
+        nextQuery: RG,
+        context?: any
+      ): RG | boolean;
+      /**
        * This callback is invoked before a rule or group is removed. The function should return
        * `true` if the rule or group should be removed or `false` if it should not be removed.
        */

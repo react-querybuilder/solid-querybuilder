@@ -46,6 +46,7 @@ export interface RuleGroupState {
   readonly addRule: ActionHandler;
   readonly addGroup: ActionHandler;
   readonly cloneGroup: ActionHandler;
+  readonly ungroup: ActionHandler;
   readonly toggleLockGroup: ActionHandler;
   readonly toggleMuteGroup: ActionHandler;
   readonly removeGroup: ActionHandler;
@@ -152,6 +153,10 @@ export const createRuleGroupState = (props: RuleGroupProps): RuleGroupState => {
     }
   });
 
+  const ungroup = stopPropagation((_event, context) => {
+    if (!disabled()) p().actions.ungroupRuleGroup(path(), context);
+  });
+
   const toggleLockGroup = stopPropagation(() => {
     p().actions.onPropChange('disabled', !disabled(), path());
   });
@@ -210,6 +215,7 @@ export const createRuleGroupState = (props: RuleGroupProps): RuleGroupState => {
     addRule,
     addGroup,
     cloneGroup,
+    ungroup,
     toggleLockGroup,
     toggleMuteGroup,
     removeGroup,

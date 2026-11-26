@@ -158,6 +158,19 @@ export const RuleGroupHeader = (props: {
           ruleOrGroup={state().ruleGroup}
         />
       </Show>
+      <Show when={schema().showUngroupButtons && p().path.length > 0}>
+        <Dynamic
+          component={controls().ungroupAction}
+          {...common}
+          testID={TestID.ungroup}
+          label={translations().ungroupRuleGroup?.label}
+          title={translations().ungroupRuleGroup?.title}
+          className={state().classNames.ungroup}
+          handleOnClick={state().ungroup}
+          rules={rules()}
+          ruleOrGroup={state().ruleGroup}
+        />
+      </Show>
       <Show when={schema().showLockButtons}>
         <Dynamic
           component={controls().lockGroupAction}

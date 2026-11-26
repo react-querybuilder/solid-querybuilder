@@ -84,6 +84,7 @@ type Flag =
   | 'showNotToggle'
   | 'showShiftActions'
   | 'showCloneButtons'
+  | 'showUngroupButtons'
   | 'showLockButtons'
   | 'showMuteButtons'
   | 'showUndoRedo'
@@ -102,6 +103,7 @@ const flagList: Flag[] = [
   'showNotToggle',
   'showShiftActions',
   'showCloneButtons',
+  'showUngroupButtons',
   'showLockButtons',
   'showMuteButtons',
   'showUndoRedo',

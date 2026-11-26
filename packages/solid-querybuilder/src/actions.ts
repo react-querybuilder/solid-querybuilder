@@ -13,8 +13,9 @@ import { snapshot } from 'solid-js';
 import type { QueryBuilderProps } from './types/props.js';
 
 /**
- * The `onAdd*`/`onMove*`/`onGroup*`/`onRemove` props return `false` to cancel an operation, a
- * replacement rule/group (for adds), or a replacement query (for moves and groupings).
+ * The `onAdd*`/`onMove*`/`onGroup*`/`onUngroup`/`onRemove` props return `false` to cancel an
+ * operation, a replacement rule/group (for adds), or a replacement query (for moves, groupings, and
+ * ungroupings).
  */
 type Confirmation = unknown;
 
@@ -168,13 +169,30 @@ export const createRuleActions = <
     manager.group(sourcePath, targetPath, { clone });
   };
 
-  const ungroupRuleGroup: QueryActions['ungroupRuleGroup'] = (
-    path,
-    // oxlint-disable-next-line typescript/no-explicit-any
-    _context?: any
-  ) => {
-    const ruleOrGroup = manager.findPath(path);
-    if (!ruleOrGroup) return;
+  // oxlint-disable-next-line typescript/no-explicit-any
+  const ungroupRuleGroup: QueryActions['ungroupRuleGroup'] = (path, context?: any) => {
+    const { onUngroup } = getProps();
+    const ruleGroup = manager.findPath(path);
+    if (path.length === 0 || !isRuleGroup(ruleGroup)) return;
+
+    if (onUngroup) {
+      const query = manager.getQuery();
+      const nextQuery = preview(qm => qm.ungroup(path));
+      if (!nextQuery) return;
+      const result = onUngroup(
+        ruleGroup as never,
+        path,
+        query as never,
+        nextQuery as never,
+        context
+      );
+      if (isCancelled(result)) return;
+      // Core treats only a rule group as a replacement; any other truthy value proceeds.
+      if (isRuleGroup(result)) {
+        manager.setQuery(snapshot(result) as RuleGroupTypeAny);
+        return;
+      }
+    }
 
     manager.ungroup(path);
   };

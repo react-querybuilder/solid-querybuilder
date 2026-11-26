@@ -38,6 +38,9 @@ export const defaultControlElements: Partial<Controls<FullField, string>> = {
   get cloneRuleAction() {
     return ActionElement;
   },
+  get ungroupAction() {
+    return ActionElement;
+  },
   get combinatorSelector() {
     return ValueSelector;
   },

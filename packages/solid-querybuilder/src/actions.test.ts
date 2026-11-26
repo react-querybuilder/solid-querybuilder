@@ -239,6 +239,48 @@ describe('createRuleActions', () => {
     });
   });
 
+  describe('ungroupRuleGroup', () => {
+    it('ungroups a group, with one undo entry', () => {
+      const { manager, actions } = setup({}, nested);
+      manager.clearHistory();
+      actions.ungroupRuleGroup([1]);
+      expect(manager.getQuery().rules.map(r => (r as { id: string }).id)).toEqual(['r0', 'r1']);
+      expect(manager.getHistory().past).toHaveLength(1);
+    });
+
+    it('never consults onUngroup for the root or a rule', () => {
+      const onUngroup = vi.fn(() => true);
+      const { manager, actions } = setup({ onUngroup: onUngroup as never }, nested);
+      const before = manager.getQuery();
+      actions.ungroupRuleGroup([]);
+      actions.ungroupRuleGroup([0]);
+      actions.ungroupRuleGroup([99]);
+      expect(onUngroup).not.toHaveBeenCalled();
+      expect(manager.getQuery()).toBe(before);
+    });
+
+    it('passes the group, path, queries, and context to onUngroup', () => {
+      const onUngroup = vi.fn(() => true);
+      const { manager, actions } = setup({ onUngroup: onUngroup as never }, nested);
+      const query = manager.getQuery();
+      actions.ungroupRuleGroup([1], 'ctx');
+      expect(onUngroup).toHaveBeenCalledWith(
+        query.rules[1],
+        [1],
+        query,
+        expect.objectContaining({ rules: expect.any(Array) }),
+        'ctx'
+      );
+      expect(manager.getQuery().rules).toHaveLength(2);
+    });
+
+    it('ignores a non-group truthy result', () => {
+      const { manager, actions } = setup({ onUngroup: (() => 'yes') as never }, nested);
+      actions.ungroupRuleGroup([1]);
+      expect(manager.getQuery().rules.map(r => (r as { id: string }).id)).toEqual(['r0', 'r1']);
+    });
+  });
+
   describe('history', () => {
     it('produces exactly one undo entry per action', () => {
       const { manager, actions } = setup();
@@ -291,6 +333,15 @@ describe('store proxies', () => {
     });
     const { manager, actions } = setup({ onGroupRule: () => store.query as never });
     expect(() => actions.groupRule([0], [1], false)).not.toThrow();
+    expect(manager.getQuery()).toMatchObject({ combinator: 'or', rules: [] });
+  });
+
+  it('snapshots a replacement query returned from onUngroup', () => {
+    const [store] = createStore({
+      query: { id: 'x', combinator: 'or', rules: [] } as RuleGroupType,
+    });
+    const { manager, actions } = setup({ onUngroup: () => store.query as never }, nested);
+    expect(() => actions.ungroupRuleGroup([1])).not.toThrow();
     expect(manager.getQuery()).toMatchObject({ combinator: 'or', rules: [] });
   });
 

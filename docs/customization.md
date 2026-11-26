@@ -184,6 +184,6 @@ deep-freezes its inputs with Immer, which rejects a Solid store proxy. If a quer
 Solid store, `snapshot()` it first.
 
 Between the `manager` prop and the veto callbacks (`onAddRule`, `onAddGroup`, `onRemove`,
-`onMoveRule`, `onMoveGroup`, `onGroupRule`, `onGroupGroup` — each of which can cancel or rewrite the
+`onMoveRule`, `onMoveGroup`, `onGroupRule`, `onGroupGroup`, `onUngroup` — each of which can cancel or rewrite the
 pending change), this replaces everything React Query Builder's Redux store was used for. See
 [`differences-from-react-querybuilder.md`](./differences-from-react-querybuilder.md#3-state-management).

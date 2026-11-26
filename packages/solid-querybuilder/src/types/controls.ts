@@ -58,6 +58,12 @@ export type ControlElementsProp<F extends FullField, O extends string> = Partial
    */
   cloneRuleAction: Component<ActionProps> | null;
   /**
+   * Replaces the current group with its own rules in the parent group.
+   *
+   * @default ActionElement
+   */
+  ungroupAction: Component<ActionProps> | null;
+  /**
    * Selects the `combinator` property for the current group, or the current independent
    * combinator value.
    *

@@ -201,6 +201,9 @@ export const createSchema = <F extends FullField, O extends FullOperator>({
     get showCloneButtons() {
       return config().showCloneButtons;
     },
+    get showUngroupButtons() {
+      return config().showUngroupButtons;
+    },
     get showLockButtons() {
       return config().showLockButtons;
     },
