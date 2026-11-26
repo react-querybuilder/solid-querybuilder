@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-26
+
 ### Fixed
 
 - Radio value-editor ids are now index-based (`<uid>-<index>`) instead of name-based
@@ -151,5 +153,6 @@ Authoritative list: [`docs/differences-from-react-querybuilder.md`](./docs/diffe
   `@solidjs/web`, React synthetic `MouseEvent` → the DOM `MouseEvent`, `Controls.undoRedoActions`
   non-nullable, `RuleProps.field` absent.
 
-[unreleased]: https://github.com/react-querybuilder/solid-querybuilder/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/react-querybuilder/solid-querybuilder/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/react-querybuilder/solid-querybuilder/releases/tag/v0.2.0
 [0.1.0]: https://github.com/react-querybuilder/solid-querybuilder/releases/tag/v0.1.0
