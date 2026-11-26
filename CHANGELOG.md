@@ -9,6 +9,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Radio value-editor ids are now index-based (`<uid>-<index>`) instead of name-based
+  (`<uid>-<name>`). Duplicate option names no longer collide, and names like core's `~`
+  placeholder (rendered by default when `autoSelectValue` is off, as in React) no longer leak into
+  ids. Ids remain opaque; DOM parity is unaffected.
 - Controlled mode no longer commits on mount. A `query` without a root `id` (the usual case) was
   re-applied by the sync effect's first run against the prepared query, firing `onQueryChange`
   and leaving an undo entry even with `enableMountQueryChange={false}`.

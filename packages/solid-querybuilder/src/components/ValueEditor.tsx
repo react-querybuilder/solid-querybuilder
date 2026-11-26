@@ -211,11 +211,13 @@ export const ValueEditor = <F extends FullField = FullField, O extends string = 
       </Match>
       <Match when={type() === 'radio'}>
         <span data-testid={props.testID} class={props.className} title={props.title}>
+          {/* Includes core's `~` placeholder when `autoSelectValue` is off — React renders it too.
+              Ids are index-based (React: opaque `useId`), so option names never reach the DOM id. */}
           <For each={values()}>
-            {v => (
-              <label for={`${uid}-${v.name}`}>
+            {(v, i) => (
+              <label for={`${uid}-${i()}`}>
                 <input
-                  id={`${uid}-${v.name}`}
+                  id={`${uid}-${i()}`}
                   type="radio"
                   value={v.name}
                   disabled={props.disabled}

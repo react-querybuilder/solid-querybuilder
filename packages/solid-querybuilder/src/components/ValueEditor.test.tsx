@@ -117,6 +117,26 @@ describe('ValueEditor', () => {
     expect(handleOnChange).toHaveBeenCalledWith('s2');
   });
 
+  it('derives radio ids from position, not option name', () => {
+    const odd = [
+      { name: '~', value: '~', label: '------' },
+      { name: 'a b', value: 'a b', label: 'A B' },
+      { name: 'dup', value: 'dup', label: 'Dup 1' },
+      { name: 'dup', value: 'dup', label: 'Dup 2' },
+    ];
+    const { getByTestId } = render(() => (
+      <ValueEditor {...baseProps({ type: 'radio', values: odd })} />
+    ));
+    const span = getByTestId('value-editor');
+    const inputs = [...span.querySelectorAll('input')];
+    expect(inputs.map(i => i.value)).toEqual(['~', 'a b', 'dup', 'dup']);
+    expect(new Set(inputs.map(i => i.id)).size).toBe(4);
+    for (const input of inputs) expect(input.id).not.toMatch(/[~\s]|dup/);
+    for (const label of span.querySelectorAll('label')) {
+      expect(span.querySelector(`[id="${label.getAttribute('for')}"]`)).not.toBeNull();
+    }
+  });
+
   it('renders a single selector for `select` and a multiselect for `multiselect`', () => {
     const { getByTestId, unmount } = render(() => (
       <ValueEditor {...baseProps({ type: 'select', values, value: 's2' })} />
