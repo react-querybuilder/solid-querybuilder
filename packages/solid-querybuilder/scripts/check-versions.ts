@@ -25,10 +25,10 @@ const read = async (pkg: string): Promise<string | undefined> => {
 
 // Exact pins. `solid-js` and `@solidjs/web` must move together, and only deliberately.
 const exact: Record<string, string> = {
-  'solid-js': '2.0.0-rc.0',
-  '@solidjs/web': '2.0.0-rc.0',
-  'vite-plugin-solid': '3.0.0-next.23',
-  '@solidjs/testing-library': '1.0.0-beta.2',
+  'solid-js': '2.0.4',
+  '@solidjs/web': '2.0.4',
+  '@solidjs/vite-plugin': '3.0.1',
+  '@solidjs/testing-library': '1.0.0-rc.2',
 };
 
 for (const [pkg, want] of Object.entries(exact)) {
@@ -42,16 +42,16 @@ for (const [pkg, want] of Object.entries(exact)) {
 
 // Line assertions. These catch the two drifts that produce confusing *compile* errors rather
 // than a resolution failure, and they stay correct if the exact pins above are bumped.
-const pluginVersion = await read('vite-plugin-solid');
+const pluginVersion = await read('@solidjs/vite-plugin');
 if (pluginVersion && !pluginVersion.startsWith('3.')) {
-  failures.push(`vite-plugin-solid must be on the 3.x line, got ${pluginVersion}`);
+  failures.push(`@solidjs/vite-plugin must be on the 3.x line, got ${pluginVersion}`);
 }
 
 const webVersion = await read('@solidjs/web');
 if (webVersion?.includes('-experimental.')) {
   failures.push(
     `@solidjs/web resolved to the experimental line (${webVersion}). That is npm's \`latest\` ` +
-      `tag and vite-plugin-solid@3 explicitly excludes it (<2.0.0-experimental.0). Install from ` +
+      `tag and the Solid 2 compiler excludes it (<2.0.0-experimental.0). Install from ` +
       `the \`next\` tag.`
   );
 }
@@ -72,5 +72,5 @@ if (failures.length > 0) {
 
 console.log(
   `check:versions ok — solid-js ${solidVersion}, @solidjs/web ${webVersion}, ` +
-    `vite-plugin-solid ${pluginVersion}`
+    `@solidjs/vite-plugin ${pluginVersion}`
 );

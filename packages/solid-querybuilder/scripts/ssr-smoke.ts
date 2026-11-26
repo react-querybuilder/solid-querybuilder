@@ -8,7 +8,7 @@
  *    whole point of this gate: a `solid` entry that merely *exists* but sits after `import` is
  *    silently dead, and a key-lookup check cannot see that.
  * 2. Compile-and-run a trivial consumer through Vite's SSR pipeline with
- *    `vite-plugin-solid({ solid: { generate: 'ssr', hydratable: false } })`, rendering with
+ *    `@solidjs/vite-plugin({ solid: { generate: 'ssr', hydratable: false } })`, rendering with
  *    `renderToString` from `@solidjs/web` (synchronous in Solid 2), and assert the full
  *    markup.
  *
@@ -118,14 +118,14 @@ console.log(`  (default)          → ${relative(packageRoot, defaultResolved)} 
 // --- 2. Render through Vite's SSR pipeline -----------------------------------------------------
 
 const { createServer } = await import('vite');
-const solid = (await import('vite-plugin-solid')).default;
+const solid = (await import('@solidjs/vite-plugin')).default;
 
 const vite = await createServer({
   root: packageRoot,
   configFile: false,
   logLevel: 'error',
   plugins: [solid({ solid: { generate: 'ssr', hydratable: false } })],
-  // NO hand-written `ssr.resolve.conditions`. `vite-plugin-solid@3` gives the ssr environment
+  // NO hand-written `ssr.resolve.conditions`. `@solidjs/vite-plugin@3` gives the ssr environment
   // `['solid', 'development', 'module', 'node', 'development|production']` on its own — measured,
   // not assumed — which resolves the library to its raw-JSX entry (`solid`) and `@solidjs/web` to
   // `dist/server.js` (`node`). The Solid 1 value `['solid', 'node', 'development']` was

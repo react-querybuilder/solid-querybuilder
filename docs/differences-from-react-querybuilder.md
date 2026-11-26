@@ -36,8 +36,8 @@ None of that is ported: no Redux, no `qbId`, no `dispatchQuery`, and `Schema` ca
 The supported equivalent is core's `QueryManager`, passed in through the `manager` prop:
 
 ```tsx
-import { QueryBuilder, QueryManager, formatQuery } from 'solid-querybuilder';
 import { createSignal } from 'solid-js';
+import { QueryBuilder, QueryManager, formatQuery } from 'solid-querybuilder';
 
 const manager = new QueryManager({ combinator: 'and', rules: [] }, { history: true });
 const [query, setQuery] = createSignal(manager.getQuery());

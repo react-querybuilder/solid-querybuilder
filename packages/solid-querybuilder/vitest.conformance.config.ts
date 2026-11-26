@@ -1,4 +1,4 @@
-import solid from 'vite-plugin-solid';
+import solid from '@solidjs/vite-plugin';
 import { defineConfig } from 'vitest/config';
 
 /**
@@ -20,7 +20,7 @@ import { defineConfig } from 'vitest/config';
  * break the byte-identical `class` comparison.
  *
  * ⚠️ `ssr: true` on the ssr project is **not** redundant with `solid: { generate: 'ssr' }`, and
- * removing it breaks the suite outright. `vite-plugin-solid@3` injects a `browser` condition in
+ * removing it breaks the suite outright. `@solidjs/vite-plugin@3` injects a `browser` condition in
  * test mode (`isTestMode && !options.ssr`), and `@solidjs/web`'s exports map lists `browser`
  * *before* `node`, so the browser build wins and its `renderToString` is a stub that logs
  * "renderToString is not supported in the browser" and returns `undefined`. `ssr: true`
@@ -28,7 +28,7 @@ import { defineConfig } from 'vitest/config';
  * `options.solid` is merged last, so the explicit `generate`/`hydratable` still win over the
  * `hydratable: true` that `ssr: true` would otherwise imply.
  *
- * Neither project sets `resolve.conditions`. `vite-plugin-solid@3` supplies them per environment,
+ * Neither project sets `resolve.conditions`. `@solidjs/vite-plugin@3` supplies them per environment,
  * and hand-maintaining a list on top of that only *removes* entries.
  */
 export default defineConfig({

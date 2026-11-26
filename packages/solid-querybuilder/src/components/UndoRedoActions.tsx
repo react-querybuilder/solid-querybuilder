@@ -1,7 +1,7 @@
 import { TestID } from '@react-querybuilder/core';
 import type { JSX } from '@solidjs/web';
 import { Dynamic } from '@solidjs/web';
-import { createMemo, snapshot } from 'solid-js';
+import { createMemo, deep, snapshot } from 'solid-js';
 import type { UndoRedoActionsProps } from '../types/props.js';
 
 /**
@@ -19,7 +19,7 @@ import type { UndoRedoActionsProps } from '../types/props.js';
  * of problem as the standing `snapshot()`-before-writing rule, in the opposite direction.
  *
  * `canUndo()`/`canRedo()` are plain method calls on a stable object, so they establish no
- * dependency by themselves; the memos also read `props.ruleOrGroup`, which is replaced on every
+ * dependency by themselves; the memos also deep-read `props.ruleOrGroup`, which changes on every
  * commit, to get one. Under Solid 2's automatic batching the buttons' enabled state settles on
  * the microtask flush rather than synchronously.
  */
@@ -27,10 +27,10 @@ export const UndoRedoActions = (props: UndoRedoActionsProps): JSX.Element => {
   const manager = () => snapshot(props.schema.manager);
 
   /**
-   * Establishes the dependency the method calls cannot: the outermost group is replaced on every
-   * commit, so reading it is what makes these memos recompute.
+   * Establishes the dependency the method calls cannot. Deep read: `reconcile` keeps the root
+   * proxy's identity across commits, so only its contents change.
    */
-  const historyVersion = (): unknown => props.ruleOrGroup;
+  const historyVersion = (): unknown => deep(props.ruleOrGroup);
 
   const canUndo = createMemo(() => historyVersion() !== null && manager().canUndo());
   const canRedo = createMemo(() => historyVersion() !== null && manager().canRedo());

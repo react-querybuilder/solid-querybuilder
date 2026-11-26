@@ -1,5 +1,5 @@
 import { resolve } from 'node:path';
-import solid from 'vite-plugin-solid';
+import solid from '@solidjs/vite-plugin';
 import { defineConfig } from 'vite';
 
 // `ssr: true` — the *transforms only* mode: hydratable client output and `generate: 'ssr'` server

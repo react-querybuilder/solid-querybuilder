@@ -64,19 +64,20 @@
     "conformance:test": "vitest run --config vitest.conformance.config.ts"
   },
   "peerDependencies": {
-    "solid-js": "^2.0.0-rc.0",
-    "@solidjs/web": "^2.0.0-rc.0"
+    "solid-js": "^2.0.0",
+    "@solidjs/web": "^2.0.0"
   },
   "dependencies": {
-    "@react-querybuilder/core": "^8.23.0"
+    "@react-querybuilder/core": "^8.29.0"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@solidjs/web": "2.0.0-rc.0",
-    "solid-js": "2.0.0-rc.0",
+    "@solidjs/testing-library": "1.0.0-rc.2",
+    "@solidjs/vite-plugin": "3.0.1",
+    "@solidjs/web": "2.0.4",
+    "solid-js": "2.0.4",
     "typescript": "^5.9.3",
-    "vite": "^8.2.0",
-    "vite-plugin-solid": "3.0.0-next.23"
+    "vite": "^8.4.0"
   },
   "publishConfig": {
     "access": "public"

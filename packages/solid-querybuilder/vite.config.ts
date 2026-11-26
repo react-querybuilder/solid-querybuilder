@@ -1,5 +1,5 @@
 import { resolve } from 'node:path';
-import solid from 'vite-plugin-solid';
+import solid from '@solidjs/vite-plugin';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -23,7 +23,7 @@ export default defineConfig({
     // `build:source`/`build:types`/`build:css` write into the same directory afterward.
     emptyOutDir: true,
   },
-  // No hand-written `resolve.conditions`: vite-plugin-solid@3 sets them per environment, and a
+  // No hand-written `resolve.conditions`: @solidjs/vite-plugin@3 sets them per environment, and a
   // hand-maintained list only removes entries. `Placeholder.test.tsx` guards the result.
   test: {
     name: 'solid-querybuilder',

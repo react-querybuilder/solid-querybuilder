@@ -168,6 +168,17 @@ export const createRuleActions = <
     manager.group(sourcePath, targetPath, { clone });
   };
 
+  const ungroupRuleGroup: QueryActions['ungroupRuleGroup'] = (
+    path,
+    // oxlint-disable-next-line typescript/no-explicit-any
+    _context?: any
+  ) => {
+    const ruleOrGroup = manager.findPath(path);
+    if (!ruleOrGroup) return;
+
+    manager.ungroup(path);
+  };
+
   return {
     onRuleAdd,
     onGroupAdd,
@@ -176,5 +187,6 @@ export const createRuleActions = <
     onGroupRemove: onRuleOrGroupRemove,
     moveRule,
     groupRule,
+    ungroupRuleGroup,
   };
 };

@@ -157,7 +157,7 @@ type-only module erased by the bundler), and allows `./foo.jsx` under `dist/sour
   `REACTIVE_WRITE_IN_OWNED_SCOPE`. Test harnesses must set up inside the root and write from
   outside it.
 - ⚠️ **A split effect's apply callback must return a cleanup function or `undefined`.** `v =>
-setX(v)` returns the setter's return value and throws "invalid cleanup value". Use a block body.
+  setX(v)` returns the setter's return value and throws "invalid cleanup value". Use a block body.
 - ⚠️ **An uncaught error inside an effect halts the entire reactive system** (`REACTIVITY_HALTED`)
   for the rest of the module. Intentionally-throwing tests need their own file.
 - **`batch` is gone; reads lag writes.** Not just effects — a plain `signal()` read after

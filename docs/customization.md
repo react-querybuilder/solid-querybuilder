@@ -162,8 +162,8 @@ Two smaller notes:
 Pass a `QueryManager` you own and drive the query from anywhere:
 
 ```tsx
-import { QueryBuilder, QueryManager, formatQuery } from 'solid-querybuilder';
 import { createSignal } from 'solid-js';
+import { QueryBuilder, QueryManager, formatQuery } from 'solid-querybuilder';
 
 const manager = new QueryManager({ combinator: 'and', rules: [] }, { history: true });
 const [query, setQuery] = createSignal(manager.getQuery());

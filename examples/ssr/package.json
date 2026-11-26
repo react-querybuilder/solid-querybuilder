@@ -10,17 +10,17 @@
     "test:ssr": "bun run ./ssr-smoke-test.ts"
   },
   "dependencies": {
-    "@react-querybuilder/core": "^8.23.0",
-    "@solidjs/web": "2.0.0-rc.0",
-    "solid-js": "2.0.0-rc.0",
+    "@react-querybuilder/core": "^8.29.0",
+    "@solidjs/web": "2.0.4",
+    "solid-js": "2.0.4",
     "solid-querybuilder": "workspace:*"
   },
   "devDependencies": {
+    "@solidjs/vite-plugin": "3.0.1",
     "@types/jsdom": "^30.0.0",
-    "@types/node": "^26.1.2",
-    "jsdom": "^30.0.1",
+    "@types/node": "^26.6.11",
+    "jsdom": "^31.0.1",
     "typescript": "^5.9.3",
-    "vite": "^8.2.0",
-    "vite-plugin-solid": "3.0.0-next.23"
+    "vite": "^8.4.0"
   }
 }
