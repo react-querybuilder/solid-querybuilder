@@ -227,6 +227,8 @@ Solid store, `snapshot()` it first.
 
 ⚠️ **The component never reconfigures an external manager, and reads it once.** Structural props (`fields`, `operators`, `combinators`, and so on) are not pushed into a manager you pass in, so configure it directly (`new QueryManager(query, { fields, … })` / `manager.reconfigure(…)`). The `manager` prop is read at mount only, so swapping in a different instance later is ignored. To switch managers, remount the component.
 
+⚠️ **The manager's query wins at mount.** With both `manager` and `query` passed, the mount-time `query` is ignored: the component renders the manager's current query, and the mount-time `onQueryChange` (when `enableMountQueryChange` is on) reports that query, not the prop. Only later `query` changes are pushed into the manager. Seed the manager with the initial query instead (`new QueryManager(query, …)`).
+
 Between the `manager` prop and the veto callbacks (`onAddRule`, `onAddGroup`, `onRemove`,
 `onMoveRule`, `onMoveGroup`, `onGroupRule`, `onGroupGroup`, `onUngroup` — each of which can cancel or rewrite the
 pending change), this replaces everything React Query Builder's Redux store was used for. See

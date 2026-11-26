@@ -159,6 +159,39 @@ describe('QueryBuilder', () => {
     expect(container.querySelectorAll('[data-testid="rule"]')).toHaveLength(0);
   });
 
+  it('lets an external manager take precedence over a mount-time query prop', () => {
+    const manager = new QueryManager<RuleGroupType>(query, { fields, history: true });
+    const [q, setQ] = createSignal<RuleGroupType>({
+      id: 'root',
+      combinator: 'and',
+      rules: [
+        { id: 'a', field: 'f1', operator: '=', value: 'a' },
+        { id: 'b', field: 'f2', operator: '=', value: 'b' },
+      ],
+    });
+    const onQueryChange = vi.fn();
+    const { container } = render(() => (
+      <QueryBuilder
+        fields={fields}
+        manager={manager as never}
+        query={q()}
+        onQueryChange={onQueryChange}
+      />
+    ));
+    flush();
+    expect(container.querySelectorAll('[data-testid="rule"]')).toHaveLength(1);
+    expect(manager.getQuery()).toBe(query);
+    // Only the standard mount notification, carrying the manager's query.
+    expect(onQueryChange).toHaveBeenCalledTimes(1);
+    expect(onQueryChange).toHaveBeenLastCalledWith(query);
+
+    // A later `query` change is still pushed into the manager.
+    setQ({ id: 'root', combinator: 'and', rules: [] });
+    flush();
+    expect(container.querySelectorAll('[data-testid="rule"]')).toHaveLength(0);
+    expect(onQueryChange).toHaveBeenCalledTimes(2);
+  });
+
   /** The props-reactivity gate for this component. */
   it('updates when its configuration props change', () => {
     const [showCloneButtons, setShowCloneButtons] = createSignal(false);
