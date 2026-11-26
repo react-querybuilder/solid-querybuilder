@@ -5,6 +5,17 @@ export const fields: Field[] = [
   { name: 'firstName', label: 'First Name' },
   { name: 'lastName', label: 'Last Name' },
   { name: 'age', label: 'Age', inputType: 'number' },
+  // Radio editor and (via `showNotToggle`) the not-toggle both mint ids with `createUniqueId`;
+  // the hydration surface compares `id`/`for`, so a server/client id drift fails the gate.
+  {
+    name: 'color',
+    label: 'Color',
+    valueEditorType: 'radio',
+    values: [
+      { name: 'red', label: 'Red' },
+      { name: 'blue', label: 'Blue' },
+    ],
+  },
 ];
 
 /**
@@ -31,6 +42,8 @@ export const query: RuleGroupTypeIC = {
         { id: 'r-2', field: 'lastName', operator: '=', value: 'Vai' },
         'and',
         { id: 'r-3', field: 'age', operator: '<', value: 90 },
+        'and',
+        { id: 'r-4', field: 'color', operator: '=', value: 'blue' },
       ],
     },
   ],
@@ -58,6 +71,7 @@ export const App = (props: { query: RuleGroupTypeIC }) => (
   <QueryBuilder
     fields={fields}
     defaultQuery={props.query}
+    showNotToggle
     controlElements={{ removeRuleAction: CustomRemoveRule }}
   />
 );

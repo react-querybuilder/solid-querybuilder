@@ -157,6 +157,48 @@ Two smaller notes:
 - Build class strings with core's `clsx`, not template interpolation, if you care about matching
   React Query Builder's output byte for byte.
 
+### Replacing `rule` / `ruleGroup`
+
+`controlElements.rule` receives `RuleProps`, and `controlElements.ruleGroup` receives `RuleGroupProps`. Both are exported, and they share these members:
+
+| Prop                                         | Meaning                                                                |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `rule` / `ruleGroup`                         | The node itself, a store-mirror proxy with a stable identity per `id`. |
+| `path`                                       | Its `Path` (`number[]`). Use core's path helpers to do path math.      |
+| `schema`                                     | Fields, operators, resolvers, flags, and `schema.controls`.            |
+| `actions`                                    | `onPropChange`, `onRuleAdd`, `onRuleRemove`, `moveRule`, and so on.    |
+| `translations`, `context`                    | Same as in React Query Builder.                                        |
+| `disabled`, `parentDisabled`, `parentMuted`  | Disabled and muted state, both the node's own and inherited.           |
+| `shiftUpDisabled`, `shiftDownDisabled`, `id` | Positional flags, and the node `id`.                                   |
+
+The simplest replacement wraps the default:
+
+```tsx
+import { Rule, type RuleProps } from 'solid-querybuilder';
+
+const MyRule = (props: RuleProps) => (
+  <div class="my-rule-wrapper">
+    <Rule {...props} />
+  </div>
+);
+```
+
+A rule built from scratch writes through `actions` with its own `path`:
+
+```tsx
+const MyRule = (props: RuleProps) => (
+  <input
+    value={String(props.rule.value ?? '')}
+    disabled={props.disabled || props.parentDisabled}
+    onInput={e => props.actions.onPropChange('value', e.currentTarget.value, props.path)}
+  />
+);
+```
+
+`createRuleState(props)` and `createRuleGroupState(props)` are exported too. They are the primitives the default components use (class names, the resolved field and operator, and handlers), so a from-scratch replacement can reuse them instead of rebuilding them. A replacement `ruleGroup` that renders its own children should render each child through `props.schema.controls.rule` / `props.schema.controls.ruleGroup`, so that nested overrides still apply.
+
+Generic replacements: Solid components have no compile-time prop enumeration. If your component is generic over field or operator types, write it against the default type parameters and widen once at the boundary (`props as unknown as RuleProps`), which is what the default components do.
+
 ## External control
 
 Pass a `QueryManager` you own and drive the query from anywhere:
@@ -182,6 +224,10 @@ manager.subscribe(() => setQuery(manager.getQuery()));
 The manager owns every write; the component subscribes. ⚠️ Hand the manager **plain objects** — it
 deep-freezes its inputs with Immer, which rejects a Solid store proxy. If a query came out of a
 Solid store, `snapshot()` it first.
+
+⚠️ **The component never reconfigures an external manager, and reads it once.** Structural props (`fields`, `operators`, `combinators`, and so on) are not pushed into a manager you pass in, so configure it directly (`new QueryManager(query, { fields, … })` / `manager.reconfigure(…)`). The `manager` prop is read at mount only, so swapping in a different instance later is ignored. To switch managers, remount the component.
+
+⚠️ **The manager's query wins at mount.** With both `manager` and `query` passed, the mount-time `query` is ignored: the component renders the manager's current query, and the mount-time `onQueryChange` (when `enableMountQueryChange` is on) reports that query, not the prop. Only later `query` changes are pushed into the manager. Seed the manager with the initial query instead (`new QueryManager(query, …)`).
 
 Between the `manager` prop and the veto callbacks (`onAddRule`, `onAddGroup`, `onRemove`,
 `onMoveRule`, `onMoveGroup`, `onGroupRule`, `onGroupGroup`, `onUngroup` — each of which can cancel or rewrite the

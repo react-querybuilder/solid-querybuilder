@@ -7,14 +7,13 @@ byte-identical DOM output.
 
 ## ⚠️ Requires Solid 2.0
 
-This package targets **Solid 2 only**. Its peer dependencies are `solid-js@^2.0.0-rc.0` **and**
-`@solidjs/web@^2.0.0-rc.0` — in Solid 2 the DOM runtime ships as its own package, so both are
+This package targets **Solid 2 only**. Its peer dependencies are `solid-js@^2.0.0` **and**
+`@solidjs/web@^2.0.0` — in Solid 2 the DOM runtime ships as its own package, so both are
 required.
 
-Solid 2 is currently in **beta**, and this package tracks it deliberately rather than waiting: the
-port is built on Solid 2 idiom (`merge`/`omit`, split effects, `createStore` from `solid-js`) that
-has no faithful Solid 1 equivalent. It does not carry `solid-js@1` compatibility shims and it never
-will. Should demand warrant a Solid 1.x port, it would be published separately as
+The port is built on Solid 2 idiom (`merge`/`omit`, split effects, `createStore` from `solid-js`)
+that has no faithful Solid 1 equivalent. It does not carry `solid-js@1` compatibility shims and it
+never will. Should demand warrant a Solid 1.x port, it would be published separately as
 `@react-querybuilder/solid1`.
 
 ## Installation
@@ -23,9 +22,8 @@ will. Should demand warrant a Solid 1.x port, it would be published separately a
 npm install solid-querybuilder
 ```
 
-`solid-js@^2.0.0-rc.0` and `@solidjs/web@^2.0.0-rc.0` are peer dependencies. Install
-`@solidjs/web` from the `next` dist-tag; its `latest` tag is `2.0.0-experimental.0`, an incompatible
-line. `@react-querybuilder/core` is a regular dependency and is re-exported in full — `formatQuery`,
+`solid-js@^2.0.0` and `@solidjs/web@^2.0.0` are peer dependencies.
+`@react-querybuilder/core` is a regular dependency and is re-exported in full — `formatQuery`,
 `defaultOperators`, `transformQuery`, `QueryManager` and the rest all import from
 `solid-querybuilder` — so you never need to depend on it directly.
 
@@ -56,6 +54,8 @@ function App() {
   );
 }
 ```
+
+`query={query()}` is a getter, so the prop tracks the signal. ⚠️ Solid 2 defers writes: a read right after `setQuery(...)` still returns the previous value until the next microtask (or `flush()`). See [deferred writes](./docs/differences-from-react-querybuilder.md#4-query-binding).
 
 ## Driving the query
 
@@ -119,6 +119,15 @@ identities) rather than `state.query` (a plain identity signal) whenever you are
 `state.manager` is the underlying [`QueryManager`](https://react-querybuilder.js.org); everything
 else is derived from it.
 
+Core's path helpers (`findPath`, `getParentPath`, `pathsAreEqual`, `pathIsDisabled`, `add`, `remove`, `move`, `update`, and the rest) are exported from `solid-querybuilder`. Custom UIs can do path math without depending on core directly:
+
+```tsx
+import { findPath, getParentPath } from 'solid-querybuilder';
+
+const node = findPath([1, 0], state.query); // rule or group at path [1, 0]
+const parentPath = getParentPath([1, 0]); // [1]
+```
+
 ## Styling
 
 Two prebuilt stylesheets ship in `dist`: `query-builder.css` (full) and
@@ -130,7 +139,7 @@ Two prebuilt stylesheets ship in `dist`: `query-builder.css` (full) and
 
 - [`docs/customization.md`](./docs/customization.md) — translations, `controlElements`, context,
   writing a replacement component, external control, class names.
-- [`docs/differences-from-react-querybuilder.md`](./docs/differences-from-react-querybuilder.md) —
+- [`docs/differences-from-react-querybuilder.md`](./docs/differences-from-react-querybuilder.md#4-query-binding).—
   what is and is not ported, and every intentional divergence.
 - [`docs/styling.md`](./docs/styling.md) — stylesheets, custom properties, class-name overrides.
 - [React Query Builder's documentation](https://react-querybuilder.js.org) applies to props,
@@ -146,7 +155,8 @@ Two prebuilt stylesheets ship in `dist`: `query-builder.css` (full) and
 ## Non-goals
 
 Drag and drop, UI-framework compatibility packages, `expr`/`datetime` UI, async option lists,
-a Redux store, and deprecated-prop fallbacks are all out of scope for v1.
+a Redux store (and with it `qbId`), `preserveQueryStateOnUnmount`, and deprecated-prop fallbacks
+are all out of scope for v1.
 
 ## License
 

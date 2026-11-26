@@ -24,8 +24,8 @@ solid-querybuilder/
     └── ssr/                       # hand-rolled Vite SSR consumer; the SSR gate
 ```
 
-**Target is Solid 2 only.** Peers are `solid-js@^2.0.0-rc.0` **and
-`@solidjs/web@^2.0.0-rc.0`** — in Solid 2 the DOM runtime is its own package. There is no
+**Target is Solid 2 only.** Peers are `solid-js@^2.0.0` **and `@solidjs/web@^2.0.0`** — in
+Solid 2 the DOM runtime is its own package. There is no
 `^1.9` leg anywhere: in the manifest, in CI, or in the source. A v1-target port, if it ever
 happens, is a separate repo publishing as `@react-querybuilder/solid1`; do not add compatibility
 shims or `solid-js@1` code paths here.
@@ -165,8 +165,15 @@ type-only module erased by the bundler), and allows `./foo.jsx` under `dist/sour
   Every write-then-read must `flush()` first. Never paper over this with `setTimeout` or tick
   counts. `@solidjs/testing-library`'s `render` populates the container synchronously; subsequent
   updates need `flush()`.
-- Return getter objects (not objects of accessors, not memoized fresh objects) from composables
+- **Return getter objects** (not objects of accessors, not memoized fresh objects) from composables
   whose result is read once by a Solid context or passed as a prop.
+- ⚠️ **A memo that returns fresh objects notifies every reader.** E.g. `RuleGroupBody`'s
+  `keyedRules` rebuilds each row's entry on any child change; per-row reads go through
+  equality-gated memos (`pathsAreEqual` for paths) or one edit re-runs every rule's props.
+  `fine-grained.test.tsx` (200 rules, one edit → one value-editor recompute) is the gate.
+- ⚠️ **The controlled-`query` sync effect is `{ defer: true }`.** Seeding already applied the
+  mount-time query; a first run compares the raw prop to the _prepared_ one (gained a root `id`),
+  sees `:id`, and commits — firing `onQueryChange` and an undo entry on mount.
 - **There is no `onMount`.** Solid 2 does not export one. The post-commit-mount equivalent is
   `createEffect(() => undefined, () => { … })`: a constant compute phase runs the apply phase once,
   after render, and never under SSR — which is what React's mount `useEffect` does.
@@ -317,6 +324,16 @@ The example gate was proved red twice, independently, and reverted both times:
 hydration surface comparison red while every markup assertion stayed green. Those two failure
 modes share no code, which is the point of having both.
 
+The SSR example also renders a radio editor and the not-toggle (`createUniqueId` users). Its id
+check (ids unique, every `label[for]` resolves) was proved red: a constant `NotToggle` id → "duplicate
+ids". ⚠️ Client-side id **drift** is not detectable here and the gate does not claim it: Solid 2
+hydration adopts server attributes, so a client-only id suffix _and_ an extra client-only
+`createUniqueId()` call both left the surface unchanged and hydration error-free.
+
+New unit gates (#3), each proved red: `fine-grained.test.tsx` (without the `RuleGroupBody` memos,
+all 200 value editors recompute) and the controlled-mount / store-feedback tests in
+`createQueryBuilder.test.ts` (without `{ defer: true }`, both red).
+
 All five were proven red once and reverted: coverage (threshold to 99 + an injected
 uncovered function), export-condition **order** (`import` moved first), export-condition
 **target** (`solid` repointed at `dist/index.js`), the SSR **markup** assertion (component's label
@@ -354,5 +371,5 @@ is how CI runs it.
 
 ## Repo status
 
-**Remote-less.** The repo is a local git repo with no GitHub remote and nothing pushed.
-`.github/workflows/ci.yml` exists so it is in place whenever a remote is added.
+GitHub remote: `react-querybuilder/solid-querybuilder` (`origin`). Work lands via PRs against
+`main`; CI is `.github/workflows/ci.yml`.
