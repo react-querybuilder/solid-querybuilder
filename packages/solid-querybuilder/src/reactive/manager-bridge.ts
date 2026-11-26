@@ -167,6 +167,10 @@ export const createManagerBridge = <F extends FullField, O extends FullOperator>
   // prevents a feedback loop with the subscription above. Reference equality alone is not
   // enough: a parent that holds the query in its own store hands back a proxy of the very object
   // just emitted, which is never `Object.is`-equal to it.
+  //
+  // `{ defer: true }`: seeding already applied the mount-time `query`. A first run would compare
+  // the raw prop against the *prepared* query (which gained a root `id`), see `:id`, and commit —
+  // firing `onQueryChange` and leaving an undo entry on mount.
   createEffect(
     () => getProps().query,
     nextQuery => {
@@ -175,7 +179,8 @@ export const createManagerBridge = <F extends FullField, O extends FullOperator>
       if (Object.is(raw, manager.getQuery())) return;
       if (manager.signatureOf(raw) === unchangedSignature) return;
       manager.setQuery(raw);
-    }
+    },
+    { defer: true }
   );
 
   // Structural options are applied in place, so the query, the undo/redo history, and every

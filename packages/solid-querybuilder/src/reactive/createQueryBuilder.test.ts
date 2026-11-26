@@ -198,6 +198,68 @@ describe('createQueryBuilder', () => {
     expect(state.manager.getQuery().combinator).toBe('or');
   });
 
+  it('does not commit on mount when the controlled query lacks a root id', () => {
+    // Seeding prepares the query (adds a root `id`); the sync effect must not then see the raw
+    // prop as changed and re-commit it.
+    const onQueryChange = vi.fn();
+    const [store] = createStore<{ query: RuleGroupType }>({
+      query: {
+        combinator: 'and',
+        rules: [{ id: 'r1', field: 'firstName', operator: '=', value: 'Steve' }],
+      },
+    });
+    const state = setupInRoot(() =>
+      createQueryBuilder(() => ({
+        fields,
+        query: store.query,
+        enableMountQueryChange: false,
+        onQueryChange,
+      }))
+    );
+    flush();
+
+    expect(onQueryChange).not.toHaveBeenCalled();
+    expect(state.manager.canUndo()).toBe(false);
+  });
+
+  it('settles when onQueryChange writes into a consumer store fed back as `query`', () => {
+    // Full loop: manager commit → parent store write → store proxy back in as `query`. The
+    // echoed proxy must be recognized as unchanged, not re-set (which would loop/grow history).
+    const onQueryChange = vi.fn();
+    const [store, setStore] = createStore<{ query: RuleGroupType }>({
+      query: {
+        combinator: 'and',
+        rules: [{ id: 'r1', field: 'firstName', operator: '=', value: 'Steve' }],
+      },
+    });
+    const state = setupInRoot(() =>
+      createQueryBuilder(() => ({
+        fields,
+        query: store.query,
+        enableMountQueryChange: false,
+        onQueryChange: (q: RuleGroupType) => {
+          onQueryChange(q);
+          setStore(draft => {
+            draft.query = q;
+          });
+        },
+      }))
+    );
+    flush();
+
+    state.manager.update('value', 'Vai', [0]);
+    flush();
+    flush();
+
+    expect(onQueryChange).toHaveBeenCalledTimes(1);
+    expect((state.manager.getQuery().rules[0] as { value: string }).value).toBe('Vai');
+    expect((store.query.rules[0] as { value: string }).value).toBe('Vai');
+    state.manager.undo();
+    flush();
+    expect((state.manager.getQuery().rules[0] as { value: string }).value).toBe('Steve');
+    expect(state.manager.canUndo()).toBe(false);
+  });
+
   it('seeds from a defaultQuery held in a consumer store', () => {
     const [store] = createStore<{ query: RuleGroupType }>({
       query: {

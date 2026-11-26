@@ -1,5 +1,5 @@
 import type { Path, RuleGroupTypeAny, RuleType } from '@react-querybuilder/core';
-import { isRuleGroup } from '@react-querybuilder/core';
+import { isRuleGroup, pathsAreEqual } from '@react-querybuilder/core';
 import type { JSX } from '@solidjs/web';
 import { Dynamic } from '@solidjs/web';
 import { For, Show, createComponent, createMemo } from 'solid-js';
@@ -56,10 +56,12 @@ export const RuleGroupBody = (props: {
       */}
       <For each={keyedRules()} keyed={entry => entry.key}>
         {entry => {
-          const r = () => entry().item;
-          const idx = () => entry().index;
-          const thisPath = () => entry().path;
-          const thisPathDisabled = () => entry().disabled;
+          // `keyedRules` rebuilds every entry on any change, so `entry()` notifies every row.
+          // Equality-gated memos stop that here; otherwise one edit re-runs every rule's props.
+          const r = createMemo(() => entry().item);
+          const idx = createMemo(() => entry().index);
+          const thisPath = createMemo(() => entry().path, { equals: pathsAreEqual });
+          const thisPathDisabled = createMemo(() => entry().disabled);
           const shiftUpDisabled = () => p().path.length === 0 && idx() === 0;
           const shiftDownDisabled = () => p().path.length === 0 && idx() === rules().length - 1;
 

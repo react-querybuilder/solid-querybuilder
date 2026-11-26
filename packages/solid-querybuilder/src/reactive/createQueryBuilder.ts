@@ -33,7 +33,13 @@ import { createSchema } from './schema.js';
  * passed as a prop without any consumer freezing on the first value.
  */
 export interface QueryBuilderState<F extends FullField, O extends string> {
-  /** The current query, by identity. Reassigned whenever the manager notifies. */
+  /**
+   * The current query, by identity. Reassigned whenever the manager notifies.
+   *
+   * For **rendering**, prefer {@link rootGroup}: every commit gives the edited node (and its
+   * ancestors) a new identity, so `<For>` over `query.rules` remounts them. Use `query` for
+   * identity comparisons, `formatQuery`, and serialization.
+   */
   readonly query: RuleGroupTypeAny;
   /**
    * The store mirror of the query, reconciled by `id`. Internal: it is the read path for
@@ -42,7 +48,10 @@ export interface QueryBuilderState<F extends FullField, O extends string> {
    * @internal
    */
   readonly tree: Store<QueryTree>;
-  /** The root group, read from the store mirror so `<For>` sees stable identities. */
+  /**
+   * The root group, read from the store mirror (reconciled by `id`) so `<For>` sees stable
+   * identities. **The read path for rendering** — use this, not {@link query}, in custom UIs.
+   */
   readonly rootGroup: RuleGroupTypeAny;
   readonly manager: QueryManager<RuleGroupTypeAny, F, FullOperator, FullCombinator>;
   readonly schema: Schema<F, O>;

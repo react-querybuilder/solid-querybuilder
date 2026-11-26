@@ -7,6 +7,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Controlled mode no longer commits on mount. A `query` without a root `id` (the usual case) was
+  re-applied by the sync effect's first run against the prepared query, firing `onQueryChange`
+  and leaving an undo entry even with `enableMountQueryChange={false}`.
+- A single edit no longer re-evaluates every rule's props. `RuleGroupBody` rebuilt every row's
+  entry on any child change; per-row values are now equality-gated memos. Guarded by a 200-rule
+  fine-grained test.
+
 ### Removed
 
 - **Breaking:** `createRuleContext` and `createRuleGroupContext` are no longer exported. Each was a

@@ -126,11 +126,13 @@ const fragments = [
   'data-testid="inline-combinator"',
   // The one control passed through `controlElements`.
   'custom-remove-rule',
+  'data-testid="not-toggle"',
+  'type="radio"',
   // Server-side `formatQuery(query, 'sql')`, in its HTML-escaped form: Solid's SSR escapes text
   // content, so `'` is `&#39;` and `>` is `&gt;`. Matching the raw SQL here would be a
   // false-negative waiting to happen. [Vue hindsight]
   '(firstName like &#39;Stev&#39;&#39;e%&#39; and age &gt; &#39;28&#39; or ' +
-    '(lastName = &#39;Vai&#39; and age &lt; &#39;90&#39;))',
+    '(lastName = &#39;Vai&#39; and age &lt; &#39;90&#39; and color = &#39;blue&#39;))',
 ];
 
 for (const fragment of fragments) {
@@ -152,8 +154,14 @@ const surface = (root: Element): string =>
         el.getAttribute('class') ?? '',
         el.getAttribute('data-testid') ?? '',
         el.getAttribute('data-path') ?? '',
+        // `createUniqueId` output (radio editor, not-toggle): must survive hydration unchanged.
+        el.getAttribute('id') ?? '',
+        el.getAttribute('for') ?? '',
+        el.getAttribute('name') ?? '',
       ];
-      if (el instanceof (el.ownerDocument.defaultView!.HTMLInputElement)) parts.push(el.value);
+      if (el instanceof (el.ownerDocument.defaultView!.HTMLInputElement)) {
+        parts.push(el.value, String(el.checked));
+      }
       if (el instanceof (el.ownerDocument.defaultView!.HTMLSelectElement)) parts.push(el.value);
       if (el instanceof (el.ownerDocument.defaultView!.HTMLTextAreaElement)) parts.push(el.value);
       return parts.join('|');
@@ -181,6 +189,18 @@ const { window } = dom;
 const serverRoot = window.document.querySelector('#root');
 check(serverRoot !== null, 'served HTML has no #root element (did the render throw?)');
 const serverSurface = serverRoot ? surface(serverRoot) : '';
+
+// `createUniqueId` (radio editor, not-toggle): ids unique, and every `<label for>` resolves.
+// Client-side id drift is invisible here by design — hydration adopts server attributes.
+if (serverRoot) {
+  const ids = [...serverRoot.querySelectorAll('[id]')].map(el => el.id);
+  check(ids.length >= 3, `expected radio + not-toggle ids, found ${ids.length}`);
+  check(new Set(ids).size === ids.length, `duplicate ids in served HTML: ${ids.join(', ')}`);
+  for (const label of serverRoot.querySelectorAll('label[for]')) {
+    const target = label.getAttribute('for')!;
+    check(ids.includes(target), `<label for="${target}"> has no matching id`);
+  }
+}
 
 // The built client entry is a self-contained ES module, so it is imported into *this* process
 // against jsdom's globals rather than executed by jsdom, which cannot run `type="module"`.

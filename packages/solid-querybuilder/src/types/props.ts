@@ -446,6 +446,11 @@ export type QueryBuilderProps<
        * An externally-created {@link QueryManager} to drive this query builder. When provided,
        * the query builder subscribes to it instead of creating its own manager, which allows
        * the query to be manipulated from outside the component tree.
+       *
+       * The consumer owns it: it is **never reconfigured** by the component (structural props
+       * such as `fields` or `operators` are not pushed into it — configure the manager
+       * directly), and it is **read once at mount**, so swapping it afterwards is ignored. To
+       * switch managers, remount (e.g. key the parent on the manager).
        */
       manager?: QueryManager<RG, F, O, C>;
       /**
